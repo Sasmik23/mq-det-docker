@@ -1,0 +1,63 @@
+# Evaluation configuration for connectors dataset
+DATALOADER:
+  ASPECT_RATIO_GROUPING: false
+  SIZE_DIVISIBILITY: 32
+
+DATASETS:
+  GENERAL_COPY: 16
+  OVERRIDE_CATEGORY: '[{"id": 1, "name": "yellow_connector", "supercategory": "object"},
+    {"id": 2, "name": "orange_connector", "supercategory": "object"}, 
+    {"id": 3, "name": "white_connector", "supercategory": "object"}]'
+  PREDEFINED_TEXT: odinw/pothole/category_description.json
+  REGISTER:
+    test:
+      ann_file: connectors/annotations/instances_val_connectors.json
+      img_dir: connectors/images/val
+    train:
+      ann_file: connectors/annotations/instances_train_connectors.json
+      img_dir: connectors/images/train
+    train_1_3:
+      ann_file: connectors/annotations/instances_train_connectors.json
+      img_dir: connectors/images/train
+    train_3_3:
+      ann_file: connectors/annotations/instances_train_connectors.json
+      img_dir: connectors/images/train
+    train_5_3:
+      ann_file: connectors/annotations/instances_train_connectors.json
+      img_dir: connectors/images/train
+    train_10_3:
+      ann_file: connectors/annotations/instances_train_connectors.json
+      img_dir: connectors/images/train
+    val:
+      ann_file: connectors/annotations/instances_val_connectors.json
+      img_dir: connectors/images/val
+  TEST: ("val",)
+  TRAIN: ("train",)
+  TRAIN_DATASETNAME_SUFFIX: "_vision_query"
+
+INPUT:
+  MAX_SIZE_TEST: 1333
+  MAX_SIZE_TRAIN: 1333
+  MIN_SIZE_TEST: 800
+  MIN_SIZE_TRAIN: 800
+
+MODEL:
+  ATSS:
+    NUM_CLASSES: 4  # 3 connectors + background
+  DYHEAD:
+    NUM_CLASSES: 4
+  FCOS:
+    NUM_CLASSES: 4
+  ROI_BOX_HEAD:
+    NUM_CLASSES: 4
+
+SOLVER:
+  CHECKPOINT_PERIOD: 100
+  MAX_EPOCH: 12
+  WARMUP_ITERS: 0
+
+TEST:
+  IMS_PER_BATCH: 4
+
+VISION_QUERY:
+  DATASET_NAME: 'connectors'

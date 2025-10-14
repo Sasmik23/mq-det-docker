@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  mq-det:
+    build: .
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+    volumes:
+      # Mount your dataset directory
+      - ./DATASET:/workspace/DATASET
+      # Mount output directory for models
+      - ./OUTPUT:/workspace/OUTPUT
+      # Mount configs for custom configurations
+      - ./configs:/workspace/configs/custom
+      # Mount for development (optional)
+      - .:/workspace/src
+    ports:
+      - "8888:8888"  # Jupyter notebook (if needed)
+      - "6006:6006"  # TensorBoard
+    stdin_open: true
+    tty: true
+    command: /bin/bash
