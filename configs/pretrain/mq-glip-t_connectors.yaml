@@ -1,121 +1,93 @@
-# Custom configuration for connectors dataset based on mq-glip-t.yaml
 MODEL:
-  META_ARCHITECTURE: "GeneralizedVLRCNN_New"
-  WEIGHT: "MODEL/glip_tiny_model_o365_goldg_cc_sbu.pth"
-  RPN_ONLY: True
-  RPN_ARCHITECTURE: "VLDYHEAD"
-
-  BACKBONE:
-    CONV_BODY: "SWINT-FPN-RETINANET"
-    OUT_CHANNELS: 256
-    FREEZE_CONV_BODY_AT: -1
-
+  META_ARCHITECTURE: "GeneralizedVLRCNN"
+  WEIGHT: "MODEL/glip_tiny_model_o365_goldg_cc_sbu.pth" # path to GLIP-T model
   LANGUAGE_BACKBONE:
     FREEZE: False
-    TOKENIZER_TYPE: "bert-base-uncased" 
     MODEL_TYPE: "bert-base-uncased"
     MASK_SPECIAL: False
-
-  ROI_BOX_HEAD:
-    POOLER_RESOLUTION: 7
-    POOLER_SCALES: (0.125, 0.0625, 0.03125, 0.015625, 0.0078125)
-    POOLER_SAMPLING_RATIO: 0
-
+  BACKBONE:
+    FREEZE_CONV_BODY_AT: -1
+    CONV_BODY: "D2-SwinT"
+  FPN:
+    USE_GN: True
+    USE_RELU: True
   RPN:
     USE_FPN: True
-    ANCHOR_SIZES: (64, 128, 256, 512, 1024)
-    ANCHOR_STRIDE: (8, 16, 32, 64, 128)
-    ASPECT_RATIOS: (1.0,)
-    SCALES_PER_OCTAVE: 1
-
-  DYHEAD:
-    CHANNELS: 256
-    NUM_CONVS: 6
-    USE_GN: True
-    USE_DYRELU: True
-    USE_DFCONV: True
-    USE_DYFUSE: True
-    TOPK: 9 # topk for selecting candidate positive samples from each level
-    SCORE_AGG: "MEAN"
-    LOG_SCALE: 0.0
-
-    FUSE_CONFIG:
-      EARLY_FUSE_ON: True
-      TYPE: "MHA-B"
-      USE_CLASSIFICATION_LOSS: False
-      USE_TOKEN_LOSS: False
-      USE_CONTRASTIVE_ALIGN_LOSS: False
-
-      USE_DOT_PRODUCT_TOKEN_LOSS: True
-      USE_LAYER_SCALE: True
-      CLAMP_MIN_FOR_UNDERFLOW: True
-      CLAMP_MAX_FOR_OVERFLOW: True
-
-      USE_VISION_QUERY_LOSS: True
-      VISION_QUERY_LOSS_WEIGHT: 10
+    ANCHOR_SIZES: (32, 64, 128, 256, 512)
+    ANCHOR_STRIDE: (4, 8, 16, 32, 64)
+    ASPECT_RATIOS: (0.23232838, 0.63365731, 1.28478321, 3.15089189)
+    PRE_NMS_TOP_N_TRAIN: 2000
+    PRE_NMS_TOP_N_TEST: 1000
+    POST_NMS_TOP_N_TRAIN: 1000
+    POST_NMS_TOP_N_TEST: 1000
+    FPN_POST_NMS_TOP_N_TRAIN: 1000
+    FPN_POST_NMS_TOP_N_TEST: 1000
+    FPN_POST_NMS_PER_BATCH: False
+    RPN_MID_CHANNEL: 256
+  ROI_HEADS:
+    USE_FPN: True
+    POSITIVE_FRACTION: 0.5
+    BG_IOU_THRESHOLD: 0.5
+    BATCH_SIZE_PER_IMAGE: 512
+    DETECTIONS_PER_IMG: 100
+    NMS_FILTER_DUPLICATES: True
+  ROI_BOX_HEAD:
+    POOLER_RESOLUTION: 7
+    POOLER_SCALES: (0.25, 0.125, 0.0625, 0.03125)
+    POOLER_SAMPLING_RATIO: 2
+    FEATURE_EXTRACTOR: "FPN2MLPFeatureExtractor"
+    PREDICTOR: "FPNPredictor"
+    NUM_CLASSES: 256 # one for each class, will be dynamically changed to the number of classes in the dataset
 
 DATASETS:
-  # NOTE: Modified for connectors dataset
-  TRAIN: ("connectors_grounding_train",)
-  TEST: ("connectors_grounding_val",)
-  FEW_SHOT: 0
-
-DATALOADER:
-  SIZE_DIVISIBILITY: 32
-  ASPECT_RATIO_GROUPING: False
+  TRAIN: ("connectors_grounding_train",)  # NOTE: use connectors training dataset
+  TEST: ("connectors_grounding_val",)     # NOTE: use connectors validation dataset for evaluation
 
 INPUT:
-  MIN_SIZE_TRAIN: (800,)
+  MIN_SIZE_TRAIN: (320, 352, 384, 416, 448, 480, 512)
   MAX_SIZE_TRAIN: 1333
   MIN_SIZE_TEST: 800
   MAX_SIZE_TEST: 1333
 
+DATALOADER:
+  SIZE_DIVISIBILITY: 32
+
 SOLVER:
   OPTIMIZER: "ADAMW"
-  BASE_LR: 0.0001
-  #### should be modified during fine-tuning #######
-  GATE_LR: 0.005
-  QUERY_LR: 0.00001
-  #################################################
+  BASE_LR: 0.00001  # NOTE: reduced learning rate for small dataset
   LANG_LR: 0.00001
   WEIGHT_DECAY: 0.0001
-  # STEPS: (0.67, 0.89)
-  STEPS: (0.95,)
-  # NOTE: Modified for custom dataset - reduced epochs
-  MAX_EPOCH: 10
-  # NOTE: Reduced batch size for local training
-  IMS_PER_BATCH: 8
-  WARMUP_ITERS: 1000
-  WARMUP_FACTOR: 0.001
-  USE_AMP: True
-  MODEL_EMA: 0.999
-  FIND_UNUSED_PARAMETERS: False
-  CHECKPOINT_PERIOD: 99999999
-  CHECKPOINT_PER_EPOCH: 2.0
-  TUNING_HIGHLEVEL_OVERRIDE:  "vision_query"
-  MAX_TO_KEEP: 4
-
+  STEPS: (0.67, 0.89)
+  MAX_ITER: 1000    # NOTE: reduced iterations for small dataset
+  IMS_PER_BATCH: 4   # NOTE: smaller batch size for limited GPU memory
+  WARMUP_ITERS: 100  # NOTE: reduced warmup
+  WARMUP_FACTOR: 0.1
+  WARMUP_METHOD: "linear"
+  CHECKPOINT_PERIOD: 500
   CLIP_GRADIENTS:
     ENABLED: True
-    CLIP_TYPE: "full_model"
+    CLIP_TYPE: "norm"
     CLIP_VALUE: 1.0
     NORM_TYPE: 2.0
 
+GLIPKNOW:
+  PARALLEL_LANGUAGE_INPUT: True
+  LAN_FEATURE_AGG_TYPE: "first"
+  KNOWLEDGE_FILE: ""
+  KNOWLEDGE_TYPE: ""
+
+TEST:
+  EVAL_TASK: 'detection'
+  CHUNKED_EVALUATION: -1
+  IMS_PER_BATCH: 4
+
+# NOTE: Vision query settings for connectors
 VISION_QUERY:
   ENABLED: True
-  # NOTE: Modified path for connectors dataset
-  QUERY_BANK_PATH: 'MODEL/connectors_query_100_sel_tiny.pth'
-  PURE_TEXT_RATE: 0.
-  TEXT_DROPOUT: 0.4
-  VISION_SCALE: 1.0
-  NUM_QUERY_PER_CLASS: 5
-  # NOTE: Reduced for small custom dataset
-  MAX_QUERY_NUMBER: 100
-  RANDOM_KSHOT: False
-  ADD_ADAPT_LAYER: False
-  CONDITION_GATE: True
-  NONLINEAR_GATE: True
-  NO_CAT: True
+  MAX_QUERY_NUMBER: 5000              # NOTE: max vision queries per category in the bank
+  NUM_QUERY_PER_CLASS: 5              # NOTE: number of queries used per category during training
+  QUERY_BANK_PATH: "MODEL/connectors_query_5000_sel_tiny.pth"  # NOTE: path to vision query bank
+  MASK_DURING_INFERENCE: False
+  TEXT_DROPOUT: 0.0
 
-# NOTE: Modified output directory
-OUTPUT_DIR: "OUTPUT/MQ-GLIP-TINY-CONNECTORS/"
+OUTPUT_DIR: 'OUTPUT/MQ-GLIP-TINY-CONNECTORS/'

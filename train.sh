@@ -1,16 +1,16 @@
 #!/bin/bash
-# Official MQ-Det Training Script for Docker Environment
+# Official MQ-Det Training Script for Connectors Dataset
 
 set -e
 
-echo "🚀 Starting Official MQ-Det Training..."
+echo "🚀 Starting Official MQ-Det Training for Connectors Dataset..."
 
 # Set environment variables
 export PYTHONPATH=/workspace:$PYTHONPATH
 export CUDA_VISIBLE_DEVICES=0
 
 # Verify query bank exists
-if [ ! -f "MODEL/connectors_query_official.pth" ]; then
+if [ ! -f "MODEL/connectors_query_5000_sel_tiny.pth" ]; then
     echo "❌ Query bank not found! Run extract_queries.sh first."
     exit 1
 fi
@@ -18,15 +18,14 @@ fi
 echo "✅ Query bank found, starting training..."
 
 # Create output directory
-mkdir -p OUTPUT/MQ-GLIP-OFFICIAL-CONNECTORS
+mkdir -p OUTPUT/MQ-GLIP-TINY-CONNECTORS
 
-# Run official MQ-Det training
-echo "🎯 Starting official MQ-Det training with vision queries..."
-python tools/train_net.py \
-    --config-file configs/custom/mq-glip-official.yaml \
-    OUTPUT_DIR 'OUTPUT/MQ-GLIP-OFFICIAL-CONNECTORS/' \
-    SOLVER.IMS_PER_BATCH 8 \
-    SOLVER.MAX_EPOCH 20 \
+# Run official MQ-Det modulated training
+echo "🎯 Starting official MQ-Det modulated training with vision queries..."
+python -m torch.distributed.launch --nproc_per_node=1 tools/train_net.py \
+    --config-file configs/pretrain/mq-glip-t_connectors.yaml \
+    --use-tensorboard \
+    OUTPUT_DIR 'OUTPUT/MQ-GLIP-TINY-CONNECTORS/' \
     2>&1 | tee OUTPUT/training.log
 
 # Check training results

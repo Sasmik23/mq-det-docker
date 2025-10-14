@@ -119,6 +119,20 @@ if __name__ == "__main__":
                         args.opt,
                         )
         os.system(cmd)
+    elif args.dataset == 'connectors':
+        if args.save_path == "":
+            save_path = 'MODEL/connectors_query_{}_pool7_sel_{}.pth'.format(args.num_vision_queries, args.add_name)
+        else:
+            save_path = str(Path(args.save_path, 'connectors_query_{}_pool7_sel_{}.pth'.format(args.num_vision_queries, args.add_name)))
+        cmd = '{} tools/train_net.py --config-file {} --additional_model_config configs/vision_query_5shot/connectors.yaml --extract_query VISION_QUERY.QUERY_BANK_SAVE_PATH {} VISION_QUERY.MAX_QUERY_NUMBER {} DATASETS.FEW_SHOT {} VISION_QUERY.QUERY_BANK_PATH "" DATALOADER.NUM_WORKERS 0 {}'\
+                .format(
+                        args.python,
+                        args.config_file,
+                        save_path,
+                        args.num_vision_queries, args.num_vision_queries,
+                        args.opt,
+                        )
+        os.system(cmd)
     elif args.dataset == 'odinw-13':
         for name, config in odinw13_configs.items():
             if args.save_path == "":
