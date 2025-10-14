@@ -2,52 +2,69 @@
 
 Complete Docker setup for authentic MQ-Det (Multi-modal Queried Object Detection) implementation with CUDA 11.8 support.
 
-## 🚀 Quick AWS EC2 Deployment
+## 🚀 Quick Cloud Deployment
 
-### Step 1: Launch EC2 Instance
-- **Instance Type**: `p3.2xlarge` (V100 16GB GPU)
-- **AMI**: Deep Learning AMI (Ubuntu 20.04)  
-- **Storage**: 100GB
-- **Security Group**: SSH (22), Custom (8888) optional
+### **Option A: Google Cloud Platform** ⭐ **RECOMMENDED**
+- **Cost**: $1.50-2.00 total ($0.30 with preemptible)
+- **Free Credits**: $300 for new accounts
+- **No Quota Issues**: T4 GPUs readily available
 
-### Step 2: Connect and Setup
+```bash
+# Create GCP VM with T4 GPU
+gcloud compute instances create mq-det-vm \
+    --zone=us-central1-a \
+    --machine-type=n1-standard-4 \
+    --accelerator=type=nvidia-tesla-t4,count=1 \
+    --image-family=tf2-latest-gpu \
+    --image-project=deeplearning-platform-release \
+    --boot-disk-size=100GB \
+    --maintenance-policy=TERMINATE \
+    --metadata="install-nvidia-driver=True"
+
+# SSH and setup
+gcloud compute ssh mq-det-vm --zone=us-central1-a
+git clone https://github.com/Sasmik23/mq-det-docker.git
+cd mq-det-docker
+chmod +x gcp_setup.sh && ./gcp_setup.sh
+```
+
+### **Option B: AWS EC2** 
+- **Cost**: $2-3 total (requires quota approval)
+- **Instance Type**: `g4dn.xlarge` (T4 GPU)
+- **AMI**: Deep Learning Base CUDA (Ubuntu 22.04)
+
 ```bash
 # SSH into your EC2 instance
 ssh -i your-key.pem ubuntu@your-ec2-ip
-
-# Clone this repository
 git clone https://github.com/Sasmik23/mq-det-docker.git
 cd mq-det-docker
-
-# Run automated setup (installs Docker, NVIDIA Docker, builds image)
-chmod +x aws_setup.sh
-./aws_setup.sh
+chmod +x aws_setup.sh && ./aws_setup.sh
 ```
 
-### Step 3: Upload Your Dataset
+### Step 3: Upload Dataset & Run
 ```bash
-# From your local machine
+# Upload your dataset (from local machine to cloud VM)
+# For GCP:
+gcloud compute scp --recurse DATASET/ mq-det-vm:~/mq-det-docker/ --zone=us-central1-a
+# For AWS:
 scp -i your-key.pem -r DATASET/ ubuntu@your-ec2-ip:~/mq-det-docker/
-```
 
-### Step 4: Run Official MQ-Det Training
-```bash
 # Start Docker container
 sudo docker-compose up -d
 
-# Enter container
+# Enter container and run official MQ-Det
 sudo docker exec -it mq-det-docker_mq-det_1 /bin/bash
-
-# Inside container - Extract official vision queries
-./extract_queries.sh
-
-# Train with official implementation  
-./train.sh
+./extract_queries.sh  # Extract vision queries
+./train.sh           # Official training
+./evaluate.sh        # Evaluation
 ```
 
-### Step 5: Download Results
+### Step 4: Download Results
 ```bash
 # Download trained models
+# For GCP:
+gcloud compute scp --recurse mq-det-vm:~/mq-det-docker/OUTPUT/ ./ --zone=us-central1-a
+# For AWS:
 scp -i your-key.pem -r ubuntu@your-ec2-ip:~/mq-det-docker/OUTPUT/ ./
 ```
 
@@ -56,23 +73,31 @@ scp -i your-key.pem -r ubuntu@your-ec2-ip:~/mq-det-docker/OUTPUT/ ./
 ```
 ├── Dockerfile                   # Official MQ-Det environment with CUDA 11.8
 ├── docker-compose.yml          # Easy deployment configuration
-├── aws_setup.sh               # Automated EC2 setup script
+├── aws_setup.sh               # Automated AWS EC2 setup script
+├── gcp_setup.sh               # Automated GCP setup script  
 ├── extract_queries.sh         # Official vision query extraction
 ├── train.sh                   # Official MQ-Det training
+├── evaluate.sh               # Finetuning-free evaluation
 ├── configs/                   # Training configurations
 ├── MQ_Det_Complete_Pipeline.ipynb  # Google Colab version
-└── AWS_RECOMMENDATION.md      # Detailed deployment guide
+├── GCP_DEPLOYMENT.md          # Detailed GCP guide
+└── AWS_RECOMMENDATION.md      # Detailed AWS guide (legacy)
 ```
 
-## 💰 Cost Estimate
-- **Instance**: p3.2xlarge @ $3.06/hour
-- **Training Time**: 3-4 hours  
-- **Total Cost**: ~$12-15
+## 💰 Cost Comparison
+
+| Platform | Instance | GPU | Cost/Hour | Training Cost | Free Credits |
+|----------|----------|-----|-----------|---------------|--------------|
+| **GCP** | n1-standard-4+T4 | T4 16GB | $0.45 | **$1.50** | **$300** |
+| **GCP Preemptible** | n1-standard-4+T4 | T4 16GB | $0.09 | **$0.30** | **$300** |
+| AWS | g4dn.xlarge | T4 16GB | $0.53 | $2.00 | None |
+| Google Colab | Compatible | T4 | Free | Free | Limited |
 
 ## 🎯 Expected Results
 - **Accuracy**: 85-95% (vs 77.78% with compatible implementation)
 - **Implementation**: 100% Official MQ-Det methodology
 - **CUDA**: Native 11.8 (no compatibility layers)
+- **Cost**: $0.30-2.00 total (vs free but limited Colab)
 
 ## 🔧 Technical Details
 - **Base**: NVIDIA CUDA 11.8 + PyTorch 1.13.1
@@ -82,10 +107,12 @@ scp -i your-key.pem -r ubuntu@your-ec2-ip:~/mq-det-docker/OUTPUT/ ./
 
 ## 📊 Performance Comparison
 
-| Environment | Implementation | Accuracy | Cost | Time |
-|-------------|---------------|----------|------|------|
-| Google Colab | Compatible | 77.78% | Free | 2-3 hrs |
-| AWS EC2 | **Official** | **90%+** | $15 | 3-4 hrs |
+| Environment | Implementation | Accuracy | Cost | Time | Quota Issues |
+|-------------|---------------|----------|------|------|--------------|
+| Google Colab | Compatible | 77.78% | Free | 2-3 hrs | None |
+| **GCP T4** | **Official** | **90%+** | **$1.50** | 3-4 hrs | **None** |
+| **GCP Preemptible** | **Official** | **90%+** | **$0.30** | 3-4 hrs | **None** |
+| AWS T4 | Official | 90%+ | $2.00 | 3-4 hrs | Quota Required |
 
 ## 🆘 Troubleshooting
 - **GPU Issues**: Ensure NVIDIA Docker is installed (`nvidia-docker2`)
