@@ -47,9 +47,9 @@ RUN python3.9 -m pip install -U \
     opencv-python matplotlib pillow tqdm \
     numpy==1.24.3 scipy scikit-learn \
     transformers==4.21.3 timm==0.6.7 tensorboard wandb \
-    # GroundingDINO(new) extras that caused your error
+    # GroundingDINO(new) extras
     addict einops einops-exts==0.0.4 ftfy pandas prettytable pymongo shapely tensorboardX \
-    supervision==0.4.0 \
+    supervision==0.4.0 yapf \
     # modern requests stack (avoid old chardet warning)
     "requests==2.31.*" charset-normalizer
 
