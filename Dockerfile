@@ -71,31 +71,33 @@ WORKDIR /workspace
 RUN git clone https://github.com/YifanXu74/MQ-Det.git . && \
     chmod +x tools/*.py
 
-# Install maskrcnn-benchmark from GLIP (more compatible with MQ-Det)
-# Set additional CUDA environment variables for compilation
+# ---- toolchain & headers needed by maskrcnn_benchmark ----
+RUN apt-get update && apt-get install -y \
+    gcc-8 g++-8 libjpeg-dev zlib1g-dev libpng-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+# Use GCC 8 for CUDA 11.x extensions
+ENV CC=/usr/bin/gcc-8
+ENV CXX=/usr/bin/g++-8
+ENV CUDAHOSTCXX=/usr/bin/g++-8
+ENV CXXFLAGS="-O3 -std=c++14"
+
+# Ensure the build sees the already-installed torch (disable isolated builds)
+ENV PIP_NO_BUILD_ISOLATION=1
+ENV PIP_USE_PEP517=0
+
+# (Optional but harmless) CUDA hint envs
 ENV CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda
 ENV CUDA_BIN_PATH=/usr/local/cuda/bin
 ENV CUDA_INCLUDE_DIRS=/usr/local/cuda/include
 ENV CUDA_LIBRARIES=/usr/local/cuda/lib64
 
-# Verify CUDA installation before building
-RUN nvcc --version && \
-    python3.9 -c "import torch; print(f'PyTorch CUDA: {torch.version.cuda}'); print(f'CUDA available: {torch.cuda.is_available()}')"
+# ---- build only GLIP's forked maskrcnn_benchmark (not the whole GLIP package) ----
+RUN git clone --recurse-submodules https://github.com/microsoft/GLIP.git /tmp/GLIP && \
+    python3.9 -m pip install -v -e /tmp/GLIP/maskrcnn_benchmark && \
+    rm -rf /tmp/GLIP
+# -------------------------------------------------------------------------------
 
-# Install maskrcnn-benchmark from Facebook's original repo (simpler, more reliable)
-# This works well with MQ-Det as long as we have the right CUDA environment
-RUN git clone https://github.com/facebookresearch/maskrcnn-benchmark.git /tmp/maskrcnn && \
-    cd /tmp/maskrcnn && \
-    # Ensure all CUDA environment variables are set properly
-    export CUDA_HOME=/usr/local/cuda && \
-    export PATH=/usr/local/cuda/bin:$PATH && \
-    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH && \
-    export TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6" && \
-    export FORCE_CUDA=1 && \
-    # Use the traditional setup method which is more reliable
-    python3.9 setup.py build develop --no-deps && \
-    cd /workspace && \
-    rm -rf /tmp/maskrcnn
 
 # Create necessary directories
 RUN mkdir -p MODEL DATASET OUTPUT configs/custom
