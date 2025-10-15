@@ -1,4 +1,4 @@
-# MQ-Det: Custom Object Detection with Docker + GCP# MQ-Det: Custom Object Detection with Docker + GCP# MQ-Det: Custom Object Detection with Docker + GCP# MQ-Det Docker - Official Paper Implementation
+# MQ-Det: Custom Object Detection with Docker + GCP# MQ-Det: Custom Object Detection with Docker + GCP# MQ-Det: Custom Object Detection with Docker + GCP# MQ-Det: Custom Object Detection with Docker + GCP# MQ-Det Docker - Official Paper Implementation
 
 
 
@@ -14,7 +14,7 @@ A streamlined Docker-based pipeline for training and evaluating [MQ-Det (Multi-Q
 
 ---
 
-> **Original Paper**: [MQ-Det: Multi-modal Queried Object Detection](https://arxiv.org/abs/2305.13962)  A streamlined Docker-based pipeline for training and evaluating [MQ-Det (Multi-Query Detection)](https://arxiv.org/abs/2305.13962) on custom datasets, deployed on Google Cloud Platform.Complete Docker setup for authentic MQ-Det (Multi-modal Queried Object Detection) with exact paper environment:
+> **Original Paper**: [MQ-Det: Multi-modal Queried Object Detection](https://arxiv.org/abs/2305.13962)  A streamlined Docker-based pipeline for training and evaluating [MQ-Det (Multi-Query Detection)](https://arxiv.org/abs/2305.13962) on custom datasets, deployed on Google Cloud Platform.
 
 ## 🎯 What This Repository Does
 
@@ -22,15 +22,15 @@ A streamlined Docker-based pipeline for training and evaluating [MQ-Det (Multi-Q
 
 This repository extends the original MQ-Det paper implementation with:
 
-- **Python**: 3.9
+
 
 - **🐳 Docker containerization** - Reproducible environment with all dependencies
 
-- **☁️ GCP deployment** - Production-ready setup on Google Cloud Platform  ---
+- **☁️ GCP deployment** - Production-ready setup on Google Cloud Platform---
 
 - **📦 Custom dataset support** - Easy training on your own object detection data
 
-- **🚀 Simplified workflow** - Three scripts: extract queries → train → evaluate> **Original Paper**: [MQ-Det: Multi-Query Detection](https://arxiv.org/abs/2305.13962)  - **PyTorch**: 2.0.1  
+- **🚀 Simplified workflow** - Three scripts: extract queries → train → evaluate> **Original Paper**: [MQ-Det: Multi-modal Queried Object Detection](https://arxiv.org/abs/2305.13962)  A streamlined Docker-based pipeline for training and evaluating [MQ-Det (Multi-Query Detection)](https://arxiv.org/abs/2305.13962) on custom datasets, deployed on Google Cloud Platform.Complete Docker setup for authentic MQ-Det (Multi-modal Queried Object Detection) with exact paper environment:
 
 - **💾 Efficient storage** - Optimized checkpoint management for cloud deployment
 
@@ -38,7 +38,7 @@ This repository extends the original MQ-Det paper implementation with:
 
 
 
----> **Original Repository**: See [ORIGINAL_MQDET_README.md](./ORIGINAL_MQDET_README.md)- **CUDA**: 11.7
+---> **Original Repository**: See [ORIGINAL_MQDET_README.md](./ORIGINAL_MQDET_README.md)
 
 
 
@@ -46,7 +46,7 @@ This repository extends the original MQ-Det paper implementation with:
 
 
 
-This implementation uses **different versions** than the original paper for **stability and compatibility**:- **GCC**: 8.3.1
+This implementation uses **different versions** than the original paper for **stability and compatibility**:- **Python**: 3.9
 
 
 
@@ -54,7 +54,7 @@ This implementation uses **different versions** than the original paper for **st
 
 |-----------|------------------|-----------|-------------------|
 
-| **PyTorch** | 2.0.1 | **1.12.1** | Stable, better CUDA 11.3 support, fewer breaking changes |- **☁️ GCP deployment** - Production-ready setup on Google Cloud Platform  ---
+| **PyTorch** | 2.0.1 | **1.12.1** | Stable compilation with maskrcnn-benchmark, better CUDA 11.3 support |- **☁️ GCP deployment** - Production-ready setup on Google Cloud Platform  ---
 
 | **CUDA** | 11.7 | **11.3** | Broader GPU compatibility (T4, P100, V100), mature ecosystem |
 
@@ -62,7 +62,7 @@ This implementation uses **different versions** than the original paper for **st
 
 | **GCC** | 9+ | **8** | Required for CUDA 11.3 compilation, Ubuntu 20.04 default |
 
-| **cuDNN** | 8.5+ | **8.0** | Matches CUDA 11.3 requirements |- **🚀 Simplified workflow** - Three scripts: extract queries → train → evaluate## 🚀 Quick Cloud Deployment
+| **cuDNN** | 8.5+ | **8.0** | Matches CUDA 11.3 requirements |- **🚀 Simplified workflow** - Three scripts: extract queries → train → evaluate> **Original Paper**: [MQ-Det: Multi-Query Detection](https://arxiv.org/abs/2305.13962)  - **PyTorch**: 2.0.1  
 
 
 
@@ -70,239 +70,545 @@ This implementation uses **different versions** than the original paper for **st
 
 
 
-**1. PyTorch 2.0.1 Compilation Issues** ❌- **⚡ Pragmatic versions** - Stable PyTorch 1.12.1 + CUDA 11.3 (vs paper's 2.0.1 + 11.7)## 🎯 What This Repository Does
+**1. PyTorch 2.0.1 Compilation Issues**- **⚡ Pragmatic versions** - Stable PyTorch 1.12.1 + CUDA 11.3 (vs paper's 2.0.1 + 11.7)## 🎯 What This Repository Does
 
-- `maskrcnn-benchmark` fails to compile with PyTorch 2.0+
-
-- Breaking changes in ATen headers (`at::nullopt` removed)
+- `maskrcnn-benchmark` fails to compile with PyTorch 2.0+ due to breaking changes in ATen headers (`at::nullopt` removed)
 
 - Custom CUDA kernels incompatible with new PyTorch C++ API
 
-- Vision transformers (Swin-T) have API changes---### **Option A: Google Cloud Platform** ⭐ **RECOMMENDED**
+- Vision transformers (Swin-T) have API changes
 
+---> **Original Repository**: See [ORIGINAL_MQDET_README.md](./ORIGINAL_MQDET_README.md)- **CUDA**: 11.7
 
+**2. CUDA 11.7 Availability Challenges**
 
-**2. CUDA 11.7 Availability Challenges** ❌
+- Limited availability on GCP T4 GPUs (requires newer drivers ≥520)
 
-- Limited availability on GCP T4 GPUs (requires newer drivers)
+- CUDA 11.3 is more mature, better tested, and widely supported
 
-- Requires NVIDIA driver >= 520, not always preinstalled## 🔄 Version Differences from Original PaperThis repository extends the original MQ-Det paper implementation with:- **Cost**: $1.50-2.00 total ($0.30 with preemptible)
+## 🔄 Version Differences from Original PaperThis repository extends the original MQ-Det paper implementation with:
 
-- CUDA 11.3 is more mature, better tested, widely supported
+**3. Pragmatic Solution: PyTorch 1.12.1 + CUDA 11.3**
 
-
-
-**3. Pragmatic Solution: PyTorch 1.12.1 + CUDA 11.3** ✅
-
-- Battle-tested combination (millions of deployments)This implementation uses **different versions** than the original paper for **stability and compatibility**:- **Free Credits**: $300 for new accounts
+- Battle-tested combination (millions of deployments)
 
 - Works on older GPUs (Pascal, Volta, Turing, Ampere)
 
-- `maskrcnn-benchmark` compiles cleanly with minor ATen patches
+- No compilation errors with maskrcnn-benchmarkThis implementation uses **different versions** than the original paper for **stability and compatibility**:- **GCC**: 8.3.1
 
-- Stable training, no gradient anomalies
-
-- Extensive community support and bug fixes| Component | Paper (Original) | This Repo | Reason for Change |- **🐳 Docker containerization** - Reproducible environment with all dependencies- **No Quota Issues**: T4 GPUs readily available
+- Compatible with GroundingDINO, GLIP dependencies
 
 
-
-**Result**: Successfully trained MQ-Det with **83% improvement** over pretrained baseline using these pragmatic versions!|-----------|------------------|-----------|-------------------|
-
-
-
----| **PyTorch** | 2.0.1 | **1.12.1** | Stable, better CUDA 11.3 support, fewer breaking changes |- **☁️ GCP deployment** - Production-ready setup on Google Cloud Platform
-
-
-
-## 📊 Results on Custom Dataset| **CUDA** | 11.7 | **11.3** | Broader GPU compatibility (T4, P100, V100), mature ecosystem |
-
-
-
-**Connectors Dataset**: 8 training images, 9 validation images| **Python** | 3.8-3.10 | **3.9** | Optimal for PyTorch 1.12.1, stable package ecosystem |- **📦 Custom dataset support** - Easy training on your own object detection data```bash
-
-
-
-| Model | AP@50 | AP (0.50:0.95) | AR@100 | Training Time || **GCC** | 9+ | **8** | Required for CUDA 11.3 compilation, Ubuntu 20.04 default |
-
-|-------|-------|----------------|--------|---------------|
-
-| Pretrained (zero-shot) | 17.5% | 4.9% | 21.5% | - || **cuDNN** | 8.5+ | **8.0** | Matches CUDA 11.3 requirements |- **🚀 Simplified workflow** - Three scripts: extract queries → train → evaluate# Create GCP VM with T4 GPU
-
-| **After 40 iterations** | **32.0%** | **13.8%** | **49.2%** | ~2 minutes |
-
-| **Improvement** | **+83%** | **+180%** | **+128%** | - |
-
-
-
-**Per-class breakdown**:### Why We Modified Versions- **💾 Efficient storage** - Optimized checkpoint management for cloud deploymentgcloud compute instances create mq-det-vm \
-
-- Orange connector: 58.9% AP@50 ⭐
-
-- Yellow connector: 27.8% AP@50
-
-- White connector: 9.2% AP@50
-
-**1. PyTorch 2.0.1 Compilation Issues** ❌    --zone=us-central1-a \
 
 ---
 
-- `maskrcnn-benchmark` fails to compile with PyTorch 2.0+
+| Component | Paper (Original) | This Repo | Reason for Change |- **🐳 Docker containerization** - Reproducible environment with all dependencies
 
-## 📋 Table of Contents
+## 🚀 Quick Start
 
-- Breaking changes in ATen headers (`at::nullopt` removed)### Results on Connectors Dataset (8 training images, 9 validation images)    --machine-type=n1-standard-4 \
+|-----------|------------------|-----------|-------------------|
 
-- [Quick Start](#quick-start)
+### Prerequisites
 
-- [Prerequisites](#prerequisites)- Custom CUDA kernels incompatible with new PyTorch C++ API
+- Google Cloud Platform account ([get $300 free credits](https://cloud.google.com/free))| **PyTorch** | 2.0.1 | **1.12.1** | Stable, better CUDA 11.3 support, fewer breaking changes |- **☁️ GCP deployment** - Production-ready setup on Google Cloud Platform  ---
 
-- [Installation](#installation)
+- Docker Desktop (for local development)
 
-- [Dataset Preparation](#dataset-preparation)- Vision transformers (Swin-T) have API changes    --accelerator=type=nvidia-tesla-t4,count=1 \
+- Git| **CUDA** | 11.7 | **11.3** | Broader GPU compatibility (T4, P100, V100), mature ecosystem |
 
-- [Training Pipeline](#training-pipeline)
 
-- [Evaluation](#evaluation)
 
-- [Configuration](#configuration)
-
-- [Cost Optimization](#cost-optimization)**2. CUDA 11.7 Availability Challenges** ❌| Model | AP@50 | AP (0.50:0.95) | AR@100 | Training Time |    --image-family=tf2-latest-gpu \
-
-- [Troubleshooting](#troubleshooting)
-
-- [Architecture](#architecture)- Limited availability on GCP T4 GPUs (requires newer drivers)
-
-- [Citation](#citation)
-
-- Requires NVIDIA driver >= 520, not always preinstalled|-------|-------|----------------|--------|---------------|    --image-project=deeplearning-platform-release \
-
----
-
-- CUDA 11.3 is more mature, better tested, widely supported
-
-## ⚡ Quick Start
-
-| Pretrained (zero-shot) | 17.5% | 4.9% | 21.5% | - |    --boot-disk-size=100GB \
-
-### 1. Setup GCP VM (one-time)
-
-**3. Pragmatic Solution: PyTorch 1.12.1 + CUDA 11.3** ✅
+### 1. Clone Repository| **Python** | 3.8-3.10 | **3.9** | Optimal for PyTorch 1.12.1, stable package ecosystem |- **📦 Custom dataset support** - Easy training on your own object detection data
 
 ```bash
 
-# On your local machine- Battle-tested combination (millions of deployments)| **After 40 iterations** | **32.0%** | **13.8%** | **49.2%** | ~2 minutes |    --maintenance-policy=TERMINATE \
+git clone https://github.com/Sasmik23/mq-det-docker.git| **GCC** | 9+ | **8** | Required for CUDA 11.3 compilation, Ubuntu 20.04 default |
+
+cd mq-det-docker
+
+```| **cuDNN** | 8.5+ | **8.0** | Matches CUDA 11.3 requirements |- **🚀 Simplified workflow** - Three scripts: extract queries → train → evaluate## 🚀 Quick Cloud Deployment
+
+
+
+### 2. Deploy to GCP
+
+```bash
+
+# Create VM with T4 GPU### Why We Modified Versions- **💾 Efficient storage** - Optimized checkpoint management for cloud deployment
+
+gcloud compute instances create mq-det-vm \
+
+  --zone=asia-east1-c \
+
+  --machine-type=n1-standard-4 \
+
+  --accelerator=type=nvidia-tesla-t4,count=1 \**1. PyTorch 2.0.1 Compilation Issues** ❌- **⚡ Pragmatic versions** - Stable PyTorch 1.12.1 + CUDA 11.3 (vs paper's 2.0.1 + 11.7)## 🎯 What This Repository Does
+
+  --image-family=pytorch-latest-gpu \
+
+  --image-project=deeplearning-platform-release \- `maskrcnn-benchmark` fails to compile with PyTorch 2.0+
+
+  --maintenance-policy=TERMINATE \
+
+  --boot-disk-size=100GB- Breaking changes in ATen headers (`at::nullopt` removed)
+
+
+
+# SSH into VM- Custom CUDA kernels incompatible with new PyTorch C++ API
+
+gcloud compute ssh mq-det-vm --zone=asia-east1-c
+
+- Vision transformers (Swin-T) have API changes---### **Option A: Google Cloud Platform** ⭐ **RECOMMENDED**
+
+# Clone repo on VM
 
 git clone https://github.com/Sasmik23/mq-det-docker.git
 
-cd mq-det-docker- Works on older GPUs (Pascal, Volta, Turing, Ampere)
+cd mq-det-docker
+
+**2. CUDA 11.7 Availability Challenges** ❌
+
+# Build Docker image
+
+docker compose build- Limited availability on GCP T4 GPUs (requires newer drivers)
 
 
 
-# Create GCP VM with GPU- `maskrcnn-benchmark` compiles cleanly with minor ATen patches| **Improvement** | **+83%** | **+180%** | **+128%** | - |    --metadata="install-nvidia-driver=True"
-
-./gcp_setup.sh
-
-```- Stable training, no gradient anomalies
-
-
-
-### 2. Prepare Dataset- Extensive community support and bug fixes
-
-
-
-```bash
-
-# SSH into GCP VM
-
-gcloud compute ssh mq-det-vm-20251015-031521 --zone=asia-east1-c**Result**: Successfully trained MQ-Det with **83% improvement** over pretrained baseline using these pragmatic versions!---# SSH and setup
-
-
-
-# Upload your dataset (from local machine)
-
-gcloud compute scp --recurse /path/to/your/dataset mq-det-vm-20251015-031521:~/mq-det-docker/DATASET/ --zone=asia-east1-c
-
-```---gcloud compute ssh mq-det-vm --zone=us-central1-a
-
-
-
-### 3. Register Dataset
-
-
-
-Edit `DATASET/your_dataset/__init__.py`:## 📊 Results on Custom Dataset## 📋 Table of Contentsgit clone https://github.com/Sasmik23/mq-det-docker.git
-
-
-
-```python
-
-DATASET_ROOT = os.getenv("DATASET", "/workspace/DATASET")
-
-**Connectors Dataset**: 8 training images, 9 validation imagescd mq-det-docker
-
-YOUR_DATASET_TRAIN = {
-
-    "img_dir": f"{DATASET_ROOT}/your_dataset/train",
-
-    "ann_file": f"{DATASET_ROOT}/your_dataset/annotations/train.json",
-
-    "dataset_name": "your_dataset_grounding_train",| Model | AP@50 | AP (0.50:0.95) | AR@100 | Training Time |- [Quick Start](#quick-start)chmod +x gcp_setup.sh && ./gcp_setup.sh
-
-}
-
-|-------|-------|----------------|--------|---------------|
-
-YOUR_DATASET_VAL = {
-
-    "img_dir": f"{DATASET_ROOT}/your_dataset/validation", | Pretrained (zero-shot) | 17.5% | 4.9% | 21.5% | - |- [Prerequisites](#prerequisites)```
-
-    "ann_file": f"{DATASET_ROOT}/your_dataset/annotations/validation.json",
-
-    "dataset_name": "your_dataset_grounding_val",| **After 40 iterations** | **32.0%** | **13.8%** | **49.2%** | ~2 minutes |
-
-}
-
-```| **Improvement** | **+83%** | **+180%** | **+128%** | - |- [Installation](#installation)
-
-
-
-### 4. Run Training Pipeline
-
-
-
-```bash**Per-class breakdown**:- [Dataset Preparation](#dataset-preparation)### **Option B: AWS EC2** 
-
-# Inside GCP VM
-
-cd ~/mq-det-docker- Orange connector: 58.9% AP@50 ⭐
+# Start container- Requires NVIDIA driver >= 520, not always preinstalled## 🔄 Version Differences from Original PaperThis repository extends the original MQ-Det paper implementation with:- **Cost**: $1.50-2.00 total ($0.30 with preemptible)
 
 docker compose up -d
 
-docker compose exec mq-det bash- Yellow connector: 27.8% AP@50- [Training Pipeline](#training-pipeline)- **Cost**: $2-3 total (requires quota approval)
+- CUDA 11.3 is more mature, better tested, widely supported
+
+# Enter container
+
+docker compose exec mq-det bash
+
+```
+
+**3. Pragmatic Solution: PyTorch 1.12.1 + CUDA 11.3** ✅
+
+### 3. Prepare Your Dataset
+
+- Battle-tested combination (millions of deployments)This implementation uses **different versions** than the original paper for **stability and compatibility**:- **Free Credits**: $300 for new accounts
+
+Organize your dataset in COCO format:
+
+```- Works on older GPUs (Pascal, Volta, Turing, Ampere)
+
+DATASET/
+
+  your_dataset/- `maskrcnn-benchmark` compiles cleanly with minor ATen patches
+
+    annotations/
+
+      train.json- Stable training, no gradient anomalies
+
+      val.json
+
+    images/- Extensive community support and bug fixes| Component | Paper (Original) | This Repo | Reason for Change |- **🐳 Docker containerization** - Reproducible environment with all dependencies- **No Quota Issues**: T4 GPUs readily available
+
+      train/
+
+        img1.jpg
+
+        img2.jpg
+
+      val/**Result**: Successfully trained MQ-Det with **83% improvement** over pretrained baseline using these pragmatic versions!|-----------|------------------|-----------|-------------------|
+
+        img3.jpg
+
+```
 
 
 
-# Inside container: Extract vision queries- White connector: 9.2% AP@50
+Register your dataset in `DATASET/your_dataset/__init__.py`:---| **PyTorch** | 2.0.1 | **1.12.1** | Stable, better CUDA 11.3 support, fewer breaking changes |- **☁️ GCP deployment** - Production-ready setup on Google Cloud Platform
 
-./extract_queries.sh
+```python
+
+YOURDATASET_TRAIN = {
+
+    'img_dir': 'DATASET/your_dataset/images/train',
+
+    'ann_file': 'DATASET/your_dataset/annotations/train.json',## 📊 Results on Custom Dataset| **CUDA** | 11.7 | **11.3** | Broader GPU compatibility (T4, P100, V100), mature ecosystem |
+
+    'dataset_name': 'your_dataset'
+
+}
+
+
+
+YOURDATASET_VAL = {**Connectors Dataset**: 8 training images, 9 validation images| **Python** | 3.8-3.10 | **3.9** | Optimal for PyTorch 1.12.1, stable package ecosystem |- **📦 Custom dataset support** - Easy training on your own object detection data```bash
+
+    'img_dir': 'DATASET/your_dataset/images/val',
+
+    'ann_file': 'DATASET/your_dataset/annotations/val.json',
+
+    'dataset_name': 'your_dataset'
+
+}| Model | AP@50 | AP (0.50:0.95) | AR@100 | Training Time || **GCC** | 9+ | **8** | Required for CUDA 11.3 compilation, Ubuntu 20.04 default |
+
+```
+
+|-------|-------|----------------|--------|---------------|
+
+Add to `maskrcnn_benchmark/config/paths_catalog.py`:
+
+```python| Pretrained (zero-shot) | 17.5% | 4.9% | 21.5% | - || **cuDNN** | 8.5+ | **8.0** | Matches CUDA 11.3 requirements |- **🚀 Simplified workflow** - Three scripts: extract queries → train → evaluate# Create GCP VM with T4 GPU
+
+"your_dataset_grounding_train": {
+
+    "img_dir": "DATASET/your_dataset/images/train",| **After 40 iterations** | **32.0%** | **13.8%** | **49.2%** | ~2 minutes |
+
+    "ann_file": "DATASET/your_dataset/annotations/train.json"
+
+},| **Improvement** | **+83%** | **+180%** | **+128%** | - |
+
+"your_dataset_grounding_val": {
+
+    "img_dir": "DATASET/your_dataset/images/val",
+
+    "ann_file": "DATASET/your_dataset/annotations/val.json"
+
+}**Per-class breakdown**:### Why We Modified Versions- **💾 Efficient storage** - Optimized checkpoint management for cloud deploymentgcloud compute instances create mq-det-vm \
+
+```
+
+- Orange connector: 58.9% AP@50 ⭐
+
+### 4. Extract Vision Queries
+
+```bash- Yellow connector: 27.8% AP@50
+
+bash scripts/extract_queries.sh
+
+```- White connector: 9.2% AP@50
+
+
+
+### 5. Train Model**1. PyTorch 2.0.1 Compilation Issues** ❌    --zone=us-central1-a \
+
+```bash
+
+bash scripts/train.sh---
+
+```
+
+- `maskrcnn-benchmark` fails to compile with PyTorch 2.0+
+
+### 6. Evaluate Model
+
+```bash## 📋 Table of Contents
+
+bash scripts/evaluate.sh
+
+```- Breaking changes in ATen headers (`at::nullopt` removed)### Results on Connectors Dataset (8 training images, 9 validation images)    --machine-type=n1-standard-4 \
+
+
+
+---- [Quick Start](#quick-start)
+
+
+
+## 📊 Results- [Prerequisites](#prerequisites)- Custom CUDA kernels incompatible with new PyTorch C++ API
+
+
+
+Training on **connectors dataset** (8 train, 9 val images, 3 classes):- [Installation](#installation)
+
+
+
+| Model | AP@50 | Improvement |- [Dataset Preparation](#dataset-preparation)- Vision transformers (Swin-T) have API changes    --accelerator=type=nvidia-tesla-t4,count=1 \
+
+|-------|-------|-------------|
+
+| **Pretrained (baseline)** | 17.5% | - |- [Training Pipeline](#training-pipeline)
+
+| **Finetuned (10 epochs)** | 32.0% | **+83%** |
+
+- [Evaluation](#evaluation)
+
+**Per-Class Performance:**
+
+- Orange connectors: 58.9%- [Configuration](#configuration)
+
+- Yellow connectors: 27.8%
+
+- White connectors: 9.2%- [Cost Optimization](#cost-optimization)**2. CUDA 11.7 Availability Challenges** ❌| Model | AP@50 | AP (0.50:0.95) | AR@100 | Training Time |    --image-family=tf2-latest-gpu \
+
+
+
+**Training Details:**- [Troubleshooting](#troubleshooting)
+
+- Architecture: RPN_ONLY + DYHEAD
+
+- Batch size: 2 (optimized for T4 GPU 16GB)- [Architecture](#architecture)- Limited availability on GCP T4 GPUs (requires newer drivers)
+
+- Image size: 640×1024
+
+- Epochs: 10 (40 iterations)- [Citation](#citation)
+
+- Training time: ~2 minutes
+
+- GPU memory: ~7GB / 16GB- Requires NVIDIA driver >= 520, not always preinstalled|-------|-------|----------------|--------|---------------|    --image-project=deeplearning-platform-release \
+
+
+
+------
+
+
+
+## 📁 Configuration Files- CUDA 11.3 is more mature, better tested, widely supported
+
+
+
+### Training Config## ⚡ Quick Start
+
+`configs/pretrain/mq-glip-t_connectors.yaml`:
+
+- Model architecture: RPN_ONLY + DYHEAD| Pretrained (zero-shot) | 17.5% | 4.9% | 21.5% | - |    --boot-disk-size=100GB \
+
+- Vision query fusion with MHA-B
+
+- Memory-optimized for T4 GPU### 1. Setup GCP VM (one-time)
+
+- Custom dataset paths
+
+**3. Pragmatic Solution: PyTorch 1.12.1 + CUDA 11.3** ✅
+
+### Evaluation Config
+
+`configs/vision_query_5shot/connectors.yaml`:```bash
+
+- 5-shot vision query evaluation
+
+- COCO metrics (AP@50, AP@75, AP@IoU=0.50:0.95)# On your local machine- Battle-tested combination (millions of deployments)| **After 40 iterations** | **32.0%** | **13.8%** | **49.2%** | ~2 minutes |    --maintenance-policy=TERMINATE \
+
+- Test dataset configuration
+
+git clone https://github.com/Sasmik23/mq-det-docker.git
+
+---
+
+cd mq-det-docker- Works on older GPUs (Pascal, Volta, Turing, Ampere)
+
+## 🛠️ Troubleshooting
+
+
+
+### Out of Memory (OOM)
+
+Reduce batch size and image size in `configs/pretrain/mq-glip-t_connectors.yaml`:# Create GCP VM with GPU- `maskrcnn-benchmark` compiles cleanly with minor ATen patches| **Improvement** | **+83%** | **+180%** | **+128%** | - |    --metadata="install-nvidia-driver=True"
+
+```yaml
+
+SOLVER:./gcp_setup.sh
+
+  IMS_PER_BATCH: 2  # Reduce from 4
+
+INPUT:```- Stable training, no gradient anomalies
+
+  MIN_SIZE_TRAIN: 640  # Reduce from 800
+
+  MAX_SIZE_TRAIN: 1024  # Reduce from 1333
+
+```
+
+### 2. Prepare Dataset- Extensive community support and bug fixes
+
+### Invalid Config Keys
+
+MQ-Det uses **RPN_ONLY** architecture (not Faster R-CNN):
+
+- ❌ Don't use `ROI_HEADS.*` configs
+
+- ❌ Don't use `GENERAL_COPY_PASTE_PROB````bash
+
+- ✅ Use `MODEL.RPN_ONLY: True`
+
+- ✅ Use `MODEL.RPN_ARCHITECTURE: "VLDYHEAD"`# SSH into GCP VM
+
+
+
+### Dataset Not Foundgcloud compute ssh mq-det-vm-20251015-031521 --zone=asia-east1-c**Result**: Successfully trained MQ-Det with **83% improvement** over pretrained baseline using these pragmatic versions!---# SSH and setup
+
+Ensure dataset is registered in:
+
+1. `DATASET/your_dataset/__init__.py`
+
+2. `maskrcnn_benchmark/config/paths_catalog.py`
+
+3. `maskrcnn_benchmark/data/datasets/evaluation/__init__.py` (for CocoGrounding_New)# Upload your dataset (from local machine)
+
+
+
+### Compilation Errorsgcloud compute scp --recurse /path/to/your/dataset mq-det-vm-20251015-031521:~/mq-det-docker/DATASET/ --zone=asia-east1-c
+
+If you encounter compilation issues:
+
+```bash```---gcloud compute ssh mq-det-vm --zone=us-central1-a
+
+# Rebuild from scratch
+
+docker compose down
+
+docker system prune -a
+
+docker compose build --no-cache### 3. Register Dataset
+
+```
+
+
+
+---
+
+Edit `DATASET/your_dataset/__init__.py`:## 📊 Results on Custom Dataset## 📋 Table of Contentsgit clone https://github.com/Sasmik23/mq-det-docker.git
+
+## 📚 Documentation
+
+
+
+- [GCP_DEPLOYMENT.md](./GCP_DEPLOYMENT.md) - Detailed GCP setup guide
+
+- [ORIGINAL_MQDET_README.md](./ORIGINAL_MQDET_README.md) - Original paper implementation docs```python
+
+- [CUSTOMIZED_PRETRAIN.md](./CUSTOMIZED_PRETRAIN.md) - Pretraining customization
+
+- [DATA.md](./DATA.md) - Dataset preparation guideDATASET_ROOT = os.getenv("DATASET", "/workspace/DATASET")
+
+- [DEBUG.md](./DEBUG.md) - Debugging tips
+
+**Connectors Dataset**: 8 training images, 9 validation imagescd mq-det-docker
+
+---
+
+YOUR_DATASET_TRAIN = {
+
+## 🔧 Architecture Overview
+
+    "img_dir": f"{DATASET_ROOT}/your_dataset/train",
+
+MQ-Det extends GLIP with **vision queries** for improved detection:
+
+    "ann_file": f"{DATASET_ROOT}/your_dataset/annotations/train.json",
+
+```
+
+Input Image → Backbone (Swin-T) → RPN → DYHEAD (fusion) → Detection Heads    "dataset_name": "your_dataset_grounding_train",| Model | AP@50 | AP (0.50:0.95) | AR@100 | Training Time |- [Quick Start](#quick-start)chmod +x gcp_setup.sh && ./gcp_setup.sh
+
+                                     ↑
+
+                              Vision Query Bank}
+
+```
+
+|-------|-------|----------------|--------|---------------|
+
+**Key Components:**
+
+- **RPN_ONLY**: Removes expensive ROI pooling, faster inferenceYOUR_DATASET_VAL = {
+
+- **DYHEAD**: Dynamic head with multi-head attention fusion (MHA-B)
+
+- **Vision Queries**: 5000 training queries + 5 evaluation queries (extracted from dataset)    "img_dir": f"{DATASET_ROOT}/your_dataset/validation", | Pretrained (zero-shot) | 17.5% | 4.9% | 21.5% | - |- [Prerequisites](#prerequisites)```
+
+- **Language Grounding**: Optional text-based object detection
+
+    "ann_file": f"{DATASET_ROOT}/your_dataset/annotations/validation.json",
+
+---
+
+    "dataset_name": "your_dataset_grounding_val",| **After 40 iterations** | **32.0%** | **13.8%** | **49.2%** | ~2 minutes |
+
+## 📝 Citation
+
+}
+
+If you use this code, please cite the original MQ-Det paper:
+
+```| **Improvement** | **+83%** | **+180%** | **+128%** | - |- [Installation](#installation)
+
+```bibtex
+
+@article{mqdet2023,
+
+  title={MQ-Det: Multi-modal Queried Object Detection in the Wild},
+
+  author={Author Names},### 4. Run Training Pipeline
+
+  journal={arXiv preprint arXiv:2305.13962},
+
+  year={2023}
+
+}
+
+``````bash**Per-class breakdown**:- [Dataset Preparation](#dataset-preparation)### **Option B: AWS EC2** 
+
+
+
+---# Inside GCP VM
+
+
+
+## 📄 Licensecd ~/mq-det-docker- Orange connector: 58.9% AP@50 ⭐
+
+
+
+This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.docker compose up -d
+
+
+
+---docker compose exec mq-det bash- Yellow connector: 27.8% AP@50- [Training Pipeline](#training-pipeline)- **Cost**: $2-3 total (requires quota approval)
+
+
+
+## 🙏 Acknowledgments
+
+
+
+- Original MQ-Det paper authors# Inside container: Extract vision queries- White connector: 9.2% AP@50
+
+- GLIP and GroundingDINO teams
+
+- maskrcnn-benchmark contributors./extract_queries.sh
+
+- PyTorch and CUDA teams
 
 - [Evaluation](#evaluation)- **Instance Type**: `g4dn.xlarge` (T4 GPU)
 
+---
+
 # Train model
+
+## 🆘 Support
 
 ./train.sh---
 
+For issues and questions:
+
+1. Check [GCP_DEPLOYMENT.md](./GCP_DEPLOYMENT.md)
+
+2. Review [DEBUG.md](./DEBUG.md)
+
+3. Open a GitHub issue with:# Evaluate- [Configuration](#configuration)- **AMI**: Deep Learning Base CUDA (Ubuntu 22.04)
+
+   - Error logs
+
+   - Config files./evaluate.sh
+
+   - Dataset structure
+
+   - System info (GPU, CUDA version)```## 📋 Table of Contents
 
 
-# Evaluate- [Configuration](#configuration)- **AMI**: Deep Learning Base CUDA (Ubuntu 22.04)
 
-./evaluate.sh
-
-```## 📋 Table of Contents
+---
 
 
 
-### 5. Download Results- [Cost Optimization](#cost-optimization)
+**Last Updated**: October 2025  ### 5. Download Results- [Cost Optimization](#cost-optimization)
+
+**Tested On**: GCP T4 GPU, PyTorch 1.12.1, CUDA 11.3
 
 
 
