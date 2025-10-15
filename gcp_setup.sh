@@ -18,6 +18,13 @@ if command -v nvidia-smi &> /dev/null; then
     nvidia-smi
 else
     echo "📦 Installing NVIDIA driver for Debian 12..."
+    
+    # Enable non-free repositories for NVIDIA drivers
+    echo "📋 Enabling non-free repositories..."
+    sudo sed -i 's/main$/main contrib non-free non-free-firmware/' /etc/apt/sources.list
+    sudo apt-get update
+    
+    # Install NVIDIA drivers
     sudo apt-get install -y nvidia-driver firmware-misc-nonfree
     echo "🔄 NVIDIA driver installed. Please reboot and re-run this script:"
     echo "   sudo reboot"
