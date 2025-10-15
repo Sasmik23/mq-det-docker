@@ -82,19 +82,20 @@ ENV CUDA_LIBRARIES=/usr/local/cuda/lib64
 RUN nvcc --version && \
     python3.9 -c "import torch; print(f'PyTorch CUDA: {torch.version.cuda}'); print(f'CUDA available: {torch.cuda.is_available()}')"
 
-# Install additional build dependencies for GLIP
-RUN python3.9 -m pip install \
-    pybind11 \
-    build \
-    wheel
-
-# Build GLIP's bundled maskrcnn_benchmark (more compatible with GLIP/MQ-Det)
-RUN git clone --depth 1 https://github.com/microsoft/GLIP.git /tmp/GLIP && \
-    cd /tmp/GLIP && \
-    # Install GLIP without PEP 517 to avoid build issues
-    python3.9 -m pip install -e . --no-build-isolation && \
+# Install maskrcnn-benchmark from Facebook's original repo (simpler, more reliable)
+# This works well with MQ-Det as long as we have the right CUDA environment
+RUN git clone https://github.com/facebookresearch/maskrcnn-benchmark.git /tmp/maskrcnn && \
+    cd /tmp/maskrcnn && \
+    # Ensure all CUDA environment variables are set properly
+    export CUDA_HOME=/usr/local/cuda && \
+    export PATH=/usr/local/cuda/bin:$PATH && \
+    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH && \
+    export TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6" && \
+    export FORCE_CUDA=1 && \
+    # Use the traditional setup method which is more reliable
+    python3.9 setup.py build develop --no-deps && \
     cd /workspace && \
-    rm -rf /tmp/GLIP
+    rm -rf /tmp/maskrcnn
 
 # Create necessary directories
 RUN mkdir -p MODEL DATASET OUTPUT configs/custom
