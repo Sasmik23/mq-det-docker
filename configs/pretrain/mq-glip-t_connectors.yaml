@@ -58,13 +58,13 @@ DATASETS:
   FEW_SHOT: 0
 
 INPUT:
-  MIN_SIZE_TRAIN: 800  # Integer, not tuple
-  MAX_SIZE_TRAIN: 1333
-  MIN_SIZE_TEST: 800
-  MAX_SIZE_TEST: 1333
+  MIN_SIZE_TRAIN: 640  # Reduced from 800 to save GPU memory
+  MAX_SIZE_TRAIN: 1024  # Reduced from 1333 to save GPU memory
+  MIN_SIZE_TEST: 640
+  MAX_SIZE_TEST: 1024
 
 AUGMENT:
-  MULT_MIN_SIZE_TRAIN: (480, 560, 640, 720, 800)  # Multi-scale training
+  MULT_MIN_SIZE_TRAIN: (480, 560, 640)  # Reduced scales to save memory
 
 DATALOADER:
   SIZE_DIVISIBILITY: 32
@@ -76,13 +76,14 @@ SOLVER:
   WEIGHT_DECAY: 0.0001
   STEPS: (0.67, 0.89)
   MAX_EPOCH: 10  # Reduced for small dataset
-  IMS_PER_BATCH: 4  # Reduced for single GPU
-  WARMUP_ITERS: 100
+  IMS_PER_BATCH: 2  # Reduced to 2 to fit in GPU memory
+  WARMUP_ITERS: 50  # Reduced proportionally
   WARMUP_FACTOR: 0.001
   USE_AMP: True
   MODEL_EMA: 0.999
   CHECKPOINT_PERIOD: 99999999
   CHECKPOINT_PER_EPOCH: 2.0
+  TUNING_HIGHLEVEL_OVERRIDE: "vision_query"
   TUNING_HIGHLEVEL_OVERRIDE: "vision_query"
   CLIP_GRADIENTS:
     ENABLED: True
