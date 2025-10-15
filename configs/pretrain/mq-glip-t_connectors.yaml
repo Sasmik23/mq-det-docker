@@ -7,7 +7,10 @@ MODEL:
     MASK_SPECIAL: False
   BACKBONE:
     FREEZE_CONV_BODY_AT: -1
-    CONV_BODY: "D2-SwinT"
+    CONV_BODY: "SWINT-FPN"  # Fixed: Use registered backbone name
+    OUT_CHANNELS: 256
+  SWINT:
+    VERSION: "vl"  # Vision-language version for GLIP
   FPN:
     USE_GN: True
     USE_RELU: True
