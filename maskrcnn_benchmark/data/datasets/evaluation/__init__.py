@@ -27,7 +27,7 @@ def evaluate(dataset, predictions, output_folder, **kwargs):
     #     return vg_evaluation(**args)
     elif isinstance(dataset, datasets.PascalVOCDataset):
         return voc_evaluation(**args)
-    elif isinstance(dataset, datasets.CocoDetectionTSV):
+    elif isinstance(dataset, datasets.CocoDetectionTSV) or isinstance(dataset, datasets.CocoGrounding_New):
         return od_to_grounding_evaluation(**args)
     elif isinstance(dataset, datasets.LvisDetection):
         pass
@@ -39,7 +39,7 @@ def evaluate(dataset, predictions, output_folder, **kwargs):
 def evaluate_mdetr(dataset, predictions, output_folder, cfg):
    
     args = dict(
-        dataset=dataset, predictions=predictions, output_folder=output_folder, **kwargs
+        dataset=dataset, predictions=predictions, output_folder=output_folder
     )
     if isinstance(dataset, datasets.COCODataset) or isinstance(dataset, datasets.TSVDataset):
         return coco_evaluation(**args)
@@ -47,7 +47,7 @@ def evaluate_mdetr(dataset, predictions, output_folder, cfg):
     #     return vg_evaluation(**args)
     elif isinstance(dataset, datasets.PascalVOCDataset):
         return voc_evaluation(**args)
-    elif isinstance(dataset, datasets.CocoDetectionTSV):
+    elif isinstance(dataset, datasets.CocoDetectionTSV) or isinstance(dataset, datasets.CocoGrounding_New):
         return od_to_grounding_evaluation(**args)
     elif isinstance(dataset, datasets.LvisDetection):
         pass
