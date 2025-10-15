@@ -110,11 +110,11 @@ RUN cd MODEL && \
 ENV PYTHONPATH=/workspace:${PYTHONPATH:-}
 
 # Create entrypoint script
-RUN echo '#!/bin/bash\n\
+RUN printf '#!/bin/bash\n\
 echo "🚀 MQ-Det Official Environment Ready!"\n\
 echo "CUDA Version: $(nvcc --version | grep release)"\n\
-echo "PyTorch: $(python -c \"import torch; print(torch.__version__)\")"\n\
-echo "CUDA Available: $(python -c \"import torch; print(torch.cuda.is_available())\")"\n\
+echo "PyTorch: $(python -c "import torch; print(torch.__version__)")"\n\
+echo "CUDA Available: $(python -c "import torch; print(torch.cuda.is_available())")"\n\
 if [ "$#" -eq 0 ]; then\n\
     exec /bin/bash\n\
 else\n\
