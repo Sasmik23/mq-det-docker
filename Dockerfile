@@ -1,130 +1,86 @@
-# Official MQ-Det Docker Environment - Paper Implementation (Optimized for smaller disk)
-# Exact paper environment: python==3.9, torch==2.0.1, GCC==8.3.1, CUDA==11.7
-FROM nvidia/cuda:11.7.1-cudnn8-devel-ubuntu20.04
+# MQ-Det container (stable build path)
+# Uses CUDA 11.3 + cuDNN8 + Ubuntu 20.04 and PyTorch 1.10.1+cu113
+# This combo provides the legacy THC headers needed by maskrcnn_benchmark.
 
-# Prevent interactive prompts during installation
+FROM nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
+
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Set CUDA environment variables for CUDA 11.7
+# --- CUDA / Torch tuning ---
+# T4 (sm_75). Add more archs if you run on other GPUs.
+ENV TORCH_CUDA_ARCH_LIST="7.5"
 ENV CUDA_HOME=/usr/local/cuda
 ENV PATH=/usr/local/cuda/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
-ENV TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6"
 ENV FORCE_CUDA=1
 
-# Install system dependencies and Python 3.9 (Ubuntu 20.04 default)
+# --- Base OS deps + Python 3.9 (via deadsnakes), dev tools, image libs ---
 RUN apt-get update && apt-get install -y \
-    python3.9 \
-    python3.9-dev \
-    python3.9-distutils \
-    python3-pip \
-    git \
-    wget \
-    curl \
-    vim \
-    build-essential \
-    cmake \
-    ninja-build \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    libgl1-mesa-glx \
-    pkg-config \
-    && rm -rf /var/lib/apt/lists/*
+    software-properties-common ca-certificates gnupg \
+    git wget curl vim pkg-config \
+    build-essential cmake ninja-build \
+    libjpeg-dev zlib1g-dev libpng-dev \
+    gcc-8 g++-8 \
+ && add-apt-repository ppa:deadsnakes/ppa -y \
+ && apt-get update && apt-get install -y \
+    python3.9 python3.9-dev python3.9-distutils python3-pip \
+ && rm -rf /var/lib/apt/lists/*
 
-# Set Python 3.9 as default python and install pip
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1 && \
-    ln -sf /usr/bin/python3.9 /usr/bin/python3 && \
-    curl https://bootstrap.pypa.io/get-pip.py | python3.9
+# Make Python 3.9 the default and bootstrap pip cleanly
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 \
+ && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.9
 
-# Upgrade pip for Python 3.9
-RUN python3.9 -m pip install --upgrade pip setuptools wheel
+# Pin setuptools to a friendly version for older build systems
+RUN python3.9 -m pip install --upgrade pip setuptools==68.2.2 wheel
 
-# Install PyTorch 2.0.1 with CUDA 11.7 support (exact paper implementation)
-RUN python3.9 -m pip install torch==2.0.1+cu117 torchvision==0.15.2+cu117 torchaudio==2.0.2+cu117 \
-    --extra-index-url https://download.pytorch.org/whl/cu117
-
-# Install essential Python packages
+# --- PyTorch 1.10.1 + cu113 (torchvision/torchaudio matched) ---
 RUN python3.9 -m pip install \
-    cython \
-    ninja \
-    yacs \
-    opencv-python \
-    pycocotools \
-    matplotlib \
-    pillow \
-    tqdm \
-    numpy==1.24.3 \
-    scipy \
-    scikit-learn \
-    transformers==4.21.3 \
-    timm==0.6.7 \
-    tensorboard \
-    wandb
+    torch==1.10.1+cu113 torchvision==0.11.2+cu113 torchaudio==0.10.1+cu113 \
+    -f https://download.pytorch.org/whl/torch_stable.html
 
-# Set working directory
+# --- Common Python deps for MQ-Det ---
+RUN python3.9 -m pip install \
+    cython ninja yacs opencv-python pycocotools matplotlib pillow tqdm \
+    numpy==1.24.3 scipy scikit-learn \
+    transformers==4.21.3 timm==0.6.7 tensorboard wandb
+
+# Workdir and MQ-Det repo
 WORKDIR /workspace
-
-# Clone MQ-Det repository
 RUN git clone https://github.com/YifanXu74/MQ-Det.git . && \
     chmod +x tools/*.py
 
-# ---- toolchain & headers needed by maskrcnn_benchmark ----
-RUN apt-get update && apt-get install -y \
-    gcc-8 g++-8 libjpeg-dev zlib1g-dev libpng-dev \
- && rm -rf /var/lib/apt/lists/*
-
-# Use GCC 8 for CUDA 11.x extensions
+# --- Build GLIP (this compiles its vendored maskrcnn_benchmark with THC headers under torch 1.10) ---
+# Toolchain/env for CUDA extensions
 ENV CC=/usr/bin/gcc-8
 ENV CXX=/usr/bin/g++-8
 ENV CUDAHOSTCXX=/usr/bin/g++-8
 ENV CXXFLAGS="-O3 -std=c++14"
-
-# Ensure pip uses the current env (where torch is already installed)
+# Ensure pip sees the current env (where torch is already installed)
 ENV PIP_NO_BUILD_ISOLATION=1
 ENV PIP_USE_PEP517=0
 
-# (Optional but harmless) CUDA hints
-ENV CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda
-ENV CUDA_BIN_PATH=/usr/local/cuda/bin
-ENV CUDA_INCLUDE_DIRS=/usr/local/cuda/include
-ENV CUDA_LIBRARIES=/usr/local/cuda/lib64
+RUN git clone --recurse-submodules https://github.com/microsoft/GLIP.git /tmp/GLIP && \
+    python3.9 -m pip install -v -e /tmp/GLIP --no-build-isolation --config-settings editable_mode=compat && \
+    # Avoid shadowing: MQ-Det has a source folder named maskrcnn_benchmark — move it aside
+    [ -d /workspace/maskrcnn_benchmark ] && mv /workspace/maskrcnn_benchmark /workspace/maskrcnn_benchmark_src || true && \
+    rm -rf /tmp/GLIP
 
-# Install maskrcnn-benchmark from Facebook (proven stable with CUDA 11.7)
-RUN git clone https://github.com/facebookresearch/maskrcnn-benchmark.git /tmp/maskrcnn && \
-    cd /tmp/maskrcnn && \
-    # Verify CUDA is available before building
-    python3.9 -c "import torch; assert torch.cuda.is_available(), 'CUDA not available'" && \
-    # Build with verbose output to catch errors
-    python3.9 setup.py build develop 2>&1 | tee /tmp/maskrcnn_build.log && \
-    # Verify the C++ extensions were built successfully
-    python3.9 -c "from maskrcnn_benchmark import _C; print('✅ maskrcnn_benchmark C++ extensions built successfully')" && \
-    cd /workspace && \
-    rm -rf /tmp/maskrcnn
+# Model weights dir
+RUN mkdir -p MODEL DATASET OUTPUT configs/custom && \
+    wget -q -O MODEL/glip_tiny_model_o365_goldg_cc_sbu.pth \
+      https://huggingface.co/GLIPModel/GLIP/resolve/main/glip_tiny_model_o365_goldg_cc_sbu.pth
 
+# PYTHONPATH so MQ-Det imports resolve
+ENV PYTHONPATH=/workspace:$PYTHONPATH
 
-# Create necessary directories
-RUN mkdir -p MODEL DATASET OUTPUT configs/custom
-
-# Download pre-trained GLIP model
-RUN cd MODEL && \
-    wget -q https://huggingface.co/GLIPModel/GLIP/resolve/main/glip_tiny_model_o365_goldg_cc_sbu.pth
-
-# Set Python path
-ENV PYTHONPATH=/workspace:${PYTHONPATH:-}
-
-# Create entrypoint script
-RUN printf '#!/bin/bash\n\
-echo "🚀 MQ-Det Official Environment Ready!"\n\
-echo "CUDA Version: $(nvcc --version | grep release)"\n\
-echo "PyTorch: $(python -c "import torch; print(torch.__version__)")"\n\
-echo "CUDA Available: $(python -c "import torch; print(torch.cuda.is_available())")"\n\
-if [ "$#" -eq 0 ]; then\n\
-    exec /bin/bash\n\
-else\n\
-    exec "$@"\n\
-fi' > /entrypoint.sh && chmod +x /entrypoint.sh
+# Simple entrypoint that prints env health, then opens a shell (or runs the passed command)
+RUN printf '%s\n' '#!/bin/bash' \
+  'echo "🚀 MQ-Det (Torch 1.10.1 + cu113) container ready"' \
+  'nvcc --version | sed -n "s/.*release/release/p"' \
+  'python - <<PY' \
+  'import torch; import os' \
+  'print("Torch:", torch.__version__, "CUDA:", torch.version.cuda, "GPU OK:", torch.cuda.is_available())' \
+  'PY' \
+  'exec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
