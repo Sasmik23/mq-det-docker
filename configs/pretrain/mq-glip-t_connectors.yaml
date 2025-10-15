@@ -1,5 +1,5 @@
 MODEL:
-  META_ARCHITECTURE: "GeneralizedVLRCNN"
+  META_ARCHITECTURE: "GeneralizedVLRCNN_New"  # Fixed: Use registered architecture name
   WEIGHT: "MODEL/glip_tiny_model_o365_goldg_cc_sbu.pth" # path to GLIP-T model
   LANGUAGE_BACKBONE:
     FREEZE: False
