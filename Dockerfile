@@ -84,7 +84,7 @@ RUN nvcc --version && \
 
 # Build GLIP's bundled maskrcnn_benchmark (more compatible with GLIP/MQ-Det)
 RUN git clone --depth 1 https://github.com/microsoft/GLIP.git /tmp/GLIP && \
-    cd /tmp/GLIP/maskrcnn_benchmark && \
+    cd /tmp/GLIP && \
     python3.9 setup.py build develop && \
     cd /workspace && \
     rm -rf /tmp/GLIP
