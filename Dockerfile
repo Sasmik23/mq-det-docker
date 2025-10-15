@@ -92,11 +92,17 @@ ENV CUDA_BIN_PATH=/usr/local/cuda/bin
 ENV CUDA_INCLUDE_DIRS=/usr/local/cuda/include
 ENV CUDA_LIBRARIES=/usr/local/cuda/lib64
 
-# ---- Install GLIP (which builds maskrcnn_benchmark) from repo root ----
-RUN git clone --recurse-submodules https://github.com/microsoft/GLIP.git /tmp/GLIP && \
-    python3.9 -m pip install -v -e /tmp/GLIP --no-build-isolation --config-settings editable_mode=compat && \
-    rm -rf /tmp/GLIP
-# ----------------------------------------------------------------------
+# Install maskrcnn-benchmark from Facebook (proven stable with CUDA 11.7)
+RUN git clone https://github.com/facebookresearch/maskrcnn-benchmark.git /tmp/maskrcnn && \
+    cd /tmp/maskrcnn && \
+    # Verify CUDA is available before building
+    python3.9 -c "import torch; assert torch.cuda.is_available(), 'CUDA not available'" && \
+    # Build with verbose output to catch errors
+    python3.9 setup.py build develop 2>&1 | tee /tmp/maskrcnn_build.log && \
+    # Verify the C++ extensions were built successfully
+    python3.9 -c "from maskrcnn_benchmark import _C; print('✅ maskrcnn_benchmark C++ extensions built successfully')" && \
+    cd /workspace && \
+    rm -rf /tmp/maskrcnn
 
 
 # Create necessary directories
