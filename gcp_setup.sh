@@ -19,17 +19,35 @@ if command -v nvidia-smi &> /dev/null; then
 else
     echo "📦 Installing NVIDIA driver for Debian 12..."
     
-    # Enable non-free repositories for NVIDIA drivers
+    # Enable non-free repositories for NVIDIA drivers (GCP compatible)
     echo "📋 Enabling non-free repositories..."
-    sudo sed -i 's/main$/main contrib non-free non-free-firmware/' /etc/apt/sources.list
+    
+    # Check current sources
+    echo "Current sources:"
+    cat /etc/apt/sources.list
+    
+    # Add non-free repositories explicitly
+    echo "deb http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
+    echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
+    echo "deb http://deb.debian.org/debian/ bookworm-updates main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
+    
     sudo apt-get update
     
-    # Install NVIDIA drivers
-    sudo apt-get install -y nvidia-driver firmware-misc-nonfree
-    echo "🔄 NVIDIA driver installed. Please reboot and re-run this script:"
+    # Try installing NVIDIA driver
+    if sudo apt-get install -y nvidia-driver; then
+        echo "✅ NVIDIA driver installed"
+    else
+        echo "⚠️  Standard nvidia-driver failed, trying legacy driver..."
+        sudo apt-get install -y nvidia-legacy-470xx-driver || {
+            echo "❌ Failed to install NVIDIA driver. Continuing with Docker approach..."
+            echo "   The container will handle CUDA, but GPU access might be limited."
+        }
+    fi
+    
+    echo "🔄 Please reboot to load the NVIDIA driver:"
     echo "   sudo reboot"
-    echo "   # After reboot:"
-    echo "   ./gcp_setup.sh"
+    echo "   # After reboot, SSH back in and run:"
+    echo "   cd mq-det-docker && ./gcp_setup.sh"
     exit 0
 fi
 
@@ -48,17 +66,21 @@ fi
 # Install NVIDIA Container Toolkit
 echo "🐳 Setting up NVIDIA Container Toolkit..."
 if ! dpkg -l | grep -q nvidia-container-toolkit; then
-    # Add NVIDIA Container Toolkit repository for Debian
-    distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+    # Use the generic deb repository for NVIDIA Container Toolkit
+    echo "📦 Installing NVIDIA Container Toolkit for Debian..."
     
-    # Use correct GPG key method for newer systems
+    # Download and add the GPG key
     curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-    curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
-        sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    
+    # Add the repository using the generic deb method
+    echo "deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://nvidia.github.io/libnvidia-container/stable/deb/$(dpkg --print-architecture) /" | \
         sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
     
+    # Update package lists and install
     sudo apt-get update
     sudo apt-get install -y nvidia-container-toolkit
+    
+    # Configure Docker to use NVIDIA runtime
     sudo nvidia-ctk runtime configure --runtime=docker
     sudo systemctl restart docker
     echo "✅ NVIDIA Container Toolkit installed"
