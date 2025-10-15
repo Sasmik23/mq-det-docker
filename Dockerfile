@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # --- CUDA / Torch tuning ---
 # T4 (sm_75). Add more archs if you run on other GPUs.
-ENV TORCH_CUDA_ARCH_LIST="7.5"
+ENV TORCH_CUDA_ARCH_LIST="7.0;7.5;8.0;8.6"
 ENV CUDA_HOME=/usr/local/cuda
 ENV PATH=/usr/local/cuda/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y \
 
 # Make Python 3.9 the default and bootstrap pip cleanly
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 \
+ && update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1 \
  && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.9
 
 # Pin setuptools to a friendly version for older build systems

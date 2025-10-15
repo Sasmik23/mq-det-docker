@@ -181,22 +181,21 @@ fi
 
 # Build Docker image with exact paper environment
 echo "🔨 Building MQ-Det Docker image with exact paper specs..."
-echo "   - CUDA 11.7 + Ubuntu 20.04"
-echo "   - Python 3.9 + GCC 8.3.1" 
-echo "   - PyTorch 2.0.1+cu117"
+echo "   - CUDA 11.3 + Ubuntu 20.04"
+echo "   - Python 3.9 + GCC 8" 
+echo "   - PyTorch 1.10.1+cu113"
 sudo docker build -t mq-det .
 
-# Test container with exact paper environment
-echo "🧪 Testing container with exact paper environment..."
-if sudo docker run --rm --gpus all mq-det python -c "
-import torch
-import sys
-print(f'✅ Python version: {sys.version}')
-print(f'✅ PyTorch version: {torch.__version__}')
-print(f'✅ CUDA available: {torch.cuda.is_available()}')
+# Test container
+echo "🧪 Testing container..."
+if sudo docker run --rm --gpus all mq-det /bin/bash -c "
+python -c 'import torch; import sys
+print(f\"✅ Python version: {sys.version}\")
+print(f\"✅ PyTorch version: {torch.__version__}\")
+print(f\"✅ CUDA available: {torch.cuda.is_available()}\")
 if torch.cuda.is_available():
-    print(f'✅ GPU: {torch.cuda.get_device_name(0)}')
-    print(f'✅ CUDA version: {torch.version.cuda}')
+    print(f\"✅ GPU: {torch.cuda.get_device_name(0)}\")
+    print(f\"✅ CUDA version: {torch.version.cuda}\")'
 "; then
     echo "✅ Container test successful - exact paper environment verified!"
 else
@@ -206,13 +205,13 @@ fi
 
 # Display setup completion
 echo ""
-echo "🎉 GCP Setup Complete - Exact Paper Environment Ready!"
+echo "🎉 GCP Setup Complete - MQ-Det Environment Ready!"
 echo ""
-echo "📋 Container Specifications (matches paper exactly):"
-echo "   ✅ CUDA: 11.7"
+echo "📋 Container Specifications:"
+echo "   ✅ CUDA: 11.3"
 echo "   ✅ Python: 3.9"
-echo "   ✅ PyTorch: 2.0.1+cu117"
-echo "   ✅ GCC: 8.3.1"
+echo "   ✅ PyTorch: 1.10.1+cu113"
+echo "   ✅ GCC: 8"
 echo "   ✅ Ubuntu: 20.04"
 echo ""
 echo "📋 Next Steps:"
