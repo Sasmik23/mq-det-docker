@@ -90,11 +90,21 @@ fi
 
 # Test NVIDIA Docker with exact paper environment
 echo "🧪 Testing NVIDIA Docker with exact paper specs..."
-if sudo docker run --rm --gpus all nvidia/cuda:11.7-cudnn8-devel-ubuntu20.04 nvidia-smi; then
+if sudo docker run --rm --gpus all nvidia/cuda:11.7.1-devel-ubuntu20.04 nvidia-smi; then
     echo "✅ NVIDIA Docker working with CUDA 11.7"
 else
-    echo "❌ NVIDIA Docker test failed"
-    exit 1
+    echo "⚠️  CUDA 11.7.1 image not found, trying alternative..."
+    if sudo docker run --rm --gpus all nvidia/cuda:11.7-runtime-ubuntu20.04 nvidia-smi; then
+        echo "✅ NVIDIA Docker working with CUDA 11.7 runtime"
+    else
+        echo "⚠️  Trying CUDA 11.8 as fallback..."
+        if sudo docker run --rm --gpus all nvidia/cuda:11.8-runtime-ubuntu20.04 nvidia-smi; then
+            echo "✅ NVIDIA Docker working with CUDA 11.8 (fallback)"
+        else
+            echo "❌ NVIDIA Docker test failed"
+            exit 1
+        fi
+    fi
 fi
 
 # Create required directories
