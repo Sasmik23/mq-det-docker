@@ -13,39 +13,55 @@ sudo apt-get update
 
 # Install NVIDIA drivers for Debian 12
 echo "🔍 Installing NVIDIA drivers for Debian 12..."
-if command -v nvidia-smi &> /dev/null && nvidia-smi > /dev/null 2>&1; then
-    echo "✅ NVIDIA driver working:"
+if command -v nvidia-smi &> /dev/null && nvidia-smi &> /dev/null; then
+    echo "✅ NVIDIA driver found and working:"
     nvidia-smi
-else
-    echo "� NVIDIA driver needs configuration or installation..."
+elif command -v nvidia-smi &> /dev/null; then
+    echo "⚠️  NVIDIA driver installed but not loaded. Attempting to load..."
     
-    # Check if driver is installed but not loaded
-    if command -v nvidia-smi &> /dev/null; then
-        echo "📋 NVIDIA driver binary found but not communicating with kernel"
-        echo "🔄 Attempting to load NVIDIA modules..."
-        
-        # Try to load NVIDIA modules
-        sudo modprobe nvidia 2>/dev/null || echo "⚠️  nvidia module not available"
-        sudo modprobe nvidia-drm 2>/dev/null || echo "⚠️  nvidia-drm module not available"
-        sudo modprobe nvidia-uvm 2>/dev/null || echo "⚠️  nvidia-uvm module not available"
-        
-        # Test again
-        if nvidia-smi > /dev/null 2>&1; then
-            echo "✅ NVIDIA driver now working after module loading:"
-            nvidia-smi
-        else
-            echo "⚠️  NVIDIA driver still not responding, attempting reinstall..."
-            # Force reinstall NVIDIA driver
-            sudo apt-get remove --purge -y 'nvidia-*' || true
-            sudo apt-get autoremove -y || true
-            NEED_DRIVER_INSTALL=true
-        fi
+    # Try to load NVIDIA modules
+    sudo modprobe nvidia
+    sudo modprobe nvidia_uvm
+    
+    # Check if driver is now working
+    if nvidia-smi &> /dev/null; then
+        echo "✅ NVIDIA driver loaded successfully:"
+        nvidia-smi
     else
-        NEED_DRIVER_INSTALL=true
+        echo "❌ NVIDIA driver failed to load. Reinstalling..."
+        # Remove existing driver and reinstall
+        sudo apt-get remove --purge -y nvidia-* libnvidia-*
+        sudo apt-get autoremove -y
+        
+        # Reinstall driver
+        echo "📦 Reinstalling NVIDIA driver..."
+        # Add non-free repositories using .sources file (avoids duplicates)
+        if [ ! -f /etc/apt/sources.list.d/debian-nonfree.sources ]; then
+            sudo tee /etc/apt/sources.list.d/debian-nonfree.sources > /dev/null <<EOF
+Types: deb
+URIs: http://deb.debian.org/debian/
+Suites: bookworm bookworm-updates
+Components: main contrib non-free non-free-firmware
+
+Types: deb
+URIs: http://security.debian.org/debian-security
+Suites: bookworm-security
+Components: main contrib non-free non-free-firmware
+EOF
+            echo "✅ Added non-free repositories"
+        fi
+        
+        sudo apt-get update
+        sudo apt-get install -y nvidia-driver
+        
+        echo "🔄 Please reboot again to load the NVIDIA driver:"
+        echo "   sudo reboot"
+        echo "   # After reboot, SSH back in and run:"
+        echo "   cd mq-det-docker && ./gcp_setup.sh"
+        exit 0
     fi
-    
-    if [ "$NEED_DRIVER_INSTALL" = "true" ]; then
-        echo "�📦 Installing NVIDIA driver for Debian 12..."
+else
+    echo "📦 Installing NVIDIA driver for Debian 12..."
     
     # Enable non-free repositories for NVIDIA drivers (GCP compatible)
     echo "📋 Enabling non-free repositories..."
@@ -74,24 +90,25 @@ EOF
     
     sudo apt-get update
     
-        # Try installing NVIDIA driver
-        if sudo apt-get install -y nvidia-driver; then
-            echo "✅ NVIDIA driver installed"
-        else
-            echo "⚠️  Standard nvidia-driver failed, trying legacy driver..."
-            sudo apt-get install -y nvidia-legacy-470xx-driver || {
-                echo "❌ Failed to install NVIDIA driver. Continuing with Docker approach..."
-                echo "   The container will handle CUDA, but GPU access might be limited."
-            }
-        fi
-        
-        echo "🔄 Please reboot to load the NVIDIA driver:"
-        echo "   sudo reboot"
-        echo "   # After reboot, SSH back in and run:"
-        echo "   cd mq-det-docker && ./gcp_setup.sh"
-        exit 0
+    # Try installing NVIDIA driver
+    if sudo apt-get install -y nvidia-driver; then
+        echo "✅ NVIDIA driver installed"
+    else
+        echo "⚠️  Standard nvidia-driver failed, trying legacy driver..."
+        sudo apt-get install -y nvidia-legacy-470xx-driver || {
+            echo "❌ Failed to install NVIDIA driver. Continuing with Docker approach..."
+            echo "   The container will handle CUDA, but GPU access might be limited."
+        }
     fi
-fi# Install Docker if not present
+    
+    echo "🔄 Please reboot to load the NVIDIA driver:"
+    echo "   sudo reboot"
+    echo "   # After reboot, SSH back in and run:"
+    echo "   cd mq-det-docker && ./gcp_setup.sh"
+    exit 0
+fi
+
+# Install Docker if not present
 if command -v docker &> /dev/null; then
     echo "✅ Docker already installed"
 else
