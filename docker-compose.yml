@@ -12,7 +12,7 @@ services:
       - DATASET=/workspace/DATASET  # Path resolution for datasets
     volumes:
       - ./DATASET:/workspace/DATASET
-      - ./OUTPUT:/workspace/OUTPUT
+      - /mnt/mqdet-output:/workspace/OUTPUT        # <-- move OUTPUT to big host mount (see gcp_setup below)
       - ./MODEL:/workspace/MODEL
       - ./configs:/workspace/configs
       - ./tools:/workspace/tools
@@ -21,6 +21,12 @@ services:
       - ./extract_queries.sh:/workspace/extract_queries.sh
       - ./train.sh:/workspace/train.sh
       - ./evaluate.sh:/workspace/evaluate.sh
+      - ./cache:/workspace/.cache                  # pip/torch cache on a bind mount
+    logging:                                       # keep container logs from eating disk
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "8888:8888"
       - "6006:6006"
