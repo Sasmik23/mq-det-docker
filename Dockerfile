@@ -82,21 +82,21 @@ ENV CXX=/usr/bin/g++-8
 ENV CUDAHOSTCXX=/usr/bin/g++-8
 ENV CXXFLAGS="-O3 -std=c++14"
 
-# Ensure the build sees the already-installed torch (disable isolated builds)
+# Ensure pip uses the current env (where torch is already installed)
 ENV PIP_NO_BUILD_ISOLATION=1
 ENV PIP_USE_PEP517=0
 
-# (Optional but harmless) CUDA hint envs
+# (Optional but harmless) CUDA hints
 ENV CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda
 ENV CUDA_BIN_PATH=/usr/local/cuda/bin
 ENV CUDA_INCLUDE_DIRS=/usr/local/cuda/include
 ENV CUDA_LIBRARIES=/usr/local/cuda/lib64
 
-# ---- build only GLIP's forked maskrcnn_benchmark (not the whole GLIP package) ----
+# ---- Install GLIP (which builds maskrcnn_benchmark) from repo root ----
 RUN git clone --recurse-submodules https://github.com/microsoft/GLIP.git /tmp/GLIP && \
-    python3.9 -m pip install -v -e /tmp/GLIP/maskrcnn_benchmark && \
+    python3.9 -m pip install -v -e /tmp/GLIP --no-build-isolation --config-settings editable_mode=compat && \
     rm -rf /tmp/GLIP
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------
 
 
 # Create necessary directories
