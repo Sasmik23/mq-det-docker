@@ -31,8 +31,10 @@ echo "✅ Found trained model and query bank, starting evaluation..."
 mkdir -p OUTPUT/connectors_evaluation
 
 # Run evaluation with vision queries
-echo "🎯 Running finetuning-free evaluation with vision queries..."
-python -m torch.distributed.launch --nproc_per_node=1 \
+echo "🎯 Running MQ-Det Evaluation..."
+
+# Evaluate with finetuning-free approach
+python3.9 -m torch.distributed.launch --nproc_per_node=1 \
     tools/test_grounding_net.py \
     --config-file configs/pretrain/mq-glip-t_connectors.yaml \
     --additional_model_config configs/vision_query_5shot/connectors.yaml \

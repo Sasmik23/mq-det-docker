@@ -10,7 +10,7 @@ export PYTHONPATH=/workspace:$PYTHONPATH
 export CUDA_VISIBLE_DEVICES=0
 
 # Check CUDA availability
-python -c "
+python3.9 -c "
 import torch
 print(f'PyTorch version: {torch.__version__}')
 print(f'CUDA available: {torch.cuda.is_available()}')
@@ -22,7 +22,7 @@ if torch.cuda.is_available():
 echo "🔍 Extracting vision queries for connectors dataset..."
 
 # Extract vision queries for training (5000 queries per class for query bank)
-python tools/train_net.py \
+python3.9 tools/train_net.py \
     --config-file configs/pretrain/mq-glip-t_connectors.yaml \
     --extract_query \
     VISION_QUERY.QUERY_BANK_PATH "" \
@@ -32,7 +32,7 @@ python tools/train_net.py \
 echo "✅ Vision query bank created: MODEL/connectors_query_5000_sel_tiny.pth"
 
 # Extract vision queries for evaluation (5 queries per class for evaluation)
-python tools/extract_vision_query.py \
+python3.9 tools/extract_vision_query.py \
     --config_file configs/pretrain/mq-glip-t_connectors.yaml \
     --dataset connectors \
     --num_vision_queries 5 \
@@ -43,7 +43,7 @@ echo "🎯 Vision query extraction completed successfully!"
 
 # Test maskrcnn-benchmark
 echo "🔧 Testing maskrcnn-benchmark..."
-python -c "
+python3.9 -c "
 try:
     import maskrcnn_benchmark
     print('✅ maskrcnn-benchmark imported successfully')
@@ -141,7 +141,7 @@ fi
 
 # Step 1: Extract vision queries using official method
 echo "🧠 Extracting vision queries using official MQ-Det method..."
-python tools/train_net.py \
+python3.9 tools/train_net.py \
     --config-file configs/custom/mq-glip-official.yaml \
     --extract_query \
     VISION_QUERY.QUERY_BANK_PATH "" \
@@ -152,7 +152,7 @@ if [ -f "MODEL/connectors_query_official.pth" ]; then
     echo "✅ Vision query extraction successful!"
     
     # Check query bank
-    python -c "
+    python3.9 -c "
 import torch
 query_bank = torch.load('MODEL/connectors_query_official.pth', map_location='cpu')
 if isinstance(query_bank, dict):

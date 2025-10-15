@@ -21,8 +21,10 @@ echo "✅ Query bank found, starting training..."
 mkdir -p OUTPUT/MQ-GLIP-TINY-CONNECTORS
 
 # Run official MQ-Det modulated training
-echo "🎯 Starting official MQ-Det modulated training with vision queries..."
-python -m torch.distributed.launch --nproc_per_node=1 tools/train_net.py \
+echo "🔍 Starting MQ-Det Training..."
+
+# Train with modulated query
+python3.9 -m torch.distributed.launch --nproc_per_node=1 tools/train_net.py \
     --config-file configs/pretrain/mq-glip-t_connectors.yaml \
     --use-tensorboard \
     OUTPUT_DIR 'OUTPUT/MQ-GLIP-TINY-CONNECTORS/' \
