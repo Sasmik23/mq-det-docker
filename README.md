@@ -55,7 +55,7 @@ This implementation uses **different versions** than the original paper for **st
 ### Why We Modified Versions
 
 **1. PyTorch 2.0.1 Compilation Issues** ❌
-- \`maskrcnn-benchmark\` fails to compile with PyTorch 2.0+ due to breaking changes in ATen headers (\`at::nullopt\` removed)
+- `maskrcnn-benchmark` fails to compile with PyTorch 2.0+ due to breaking changes in ATen headers (`at::nullopt` removed)
 - Custom CUDA kernels incompatible with new PyTorch C++ API
 - Vision transformers (Swin-T) have API changes
 
@@ -66,7 +66,7 @@ This implementation uses **different versions** than the original paper for **st
 **3. Pragmatic Solution: PyTorch 1.12.1 + CUDA 11.3** ✅
 - Battle-tested combination (millions of deployments)
 - Works on older GPUs (Pascal, Volta, Turing, Ampere)
-- \`maskrcnn-benchmark\` compiles cleanly with minor ATen patches
+- `maskrcnn-benchmark` compiles cleanly with minor ATen patches
 - Stable training, no gradient anomalies
 - Extensive community support and bug fixes
 
@@ -78,29 +78,29 @@ This implementation uses **different versions** than the original paper for **st
 
 ### Prerequisites
 
-- Google Cloud Platform account ([get \$300 free credits](https://cloud.google.com/free))
+- Google Cloud Platform account ([get $300 free credits](https://cloud.google.com/free))
 - Docker Desktop (for local development)
 - Git
 
 ### 1. Clone Repository
 
-\`\`\`bash
+```bash
 git clone https://github.com/Sasmik23/mq-det-docker.git
 cd mq-det-docker
-\`\`\`
+```
 
 ### 2. Deploy to GCP
 
-\`\`\`bash
+```bash
 # Create VM with T4 GPU
-gcloud compute instances create mq-det-vm \\
-  --zone=us-central1-a \\
-  --machine-type=n1-standard-4 \\
-  --accelerator=type=nvidia-tesla-t4,count=1 \\
-  --image-family=pytorch-latest-gpu \\
-  --image-project=deeplearning-platform-release \\
-  --maintenance-policy=TERMINATE \\
-  --boot-disk-size=100GB \\
+gcloud compute instances create mq-det-vm \
+  --zone=us-central1-a \
+  --machine-type=n1-standard-4 \
+  --accelerator=type=nvidia-tesla-t4,count=1 \
+  --image-family=pytorch-latest-gpu \
+  --image-project=deeplearning-platform-release \
+  --maintenance-policy=TERMINATE \
+  --boot-disk-size=100GB \
   --metadata="install-nvidia-driver=True"
 
 # SSH into VM
@@ -118,13 +118,13 @@ docker compose up -d
 
 # Enter container
 docker compose exec mq-det bash
-\`\`\`
+```
 
 ### 3. Prepare Your Dataset
 
 Organize your dataset in COCO format:
 
-\`\`\`
+```
 DATASET/
   your_dataset/
     annotations/
@@ -136,11 +136,11 @@ DATASET/
         img2.jpg
       val/
         img3.jpg
-\`\`\`
+```
 
-Register your dataset in \`DATASET/your_dataset/__init__.py\`:
+Register your dataset in `DATASET/your_dataset/__init__.py`:
 
-\`\`\`python
+```python
 DATASET_ROOT = os.getenv("DATASET", "/workspace/DATASET")
 
 YOURDATASET_TRAIN = {
@@ -154,25 +154,25 @@ YOURDATASET_VAL = {
     'ann_file': f'{DATASET_ROOT}/your_dataset/annotations/val.json',
     'dataset_name': 'your_dataset_grounding_val'
 }
-\`\`\`
+```
 
 ### 4. Extract Vision Queries
 
-\`\`\`bash
+```bash
 bash extract_queries.sh
-\`\`\`
+```
 
 ### 5. Train Model
 
-\`\`\`bash
+```bash
 bash train.sh
-\`\`\`
+```
 
 ### 6. Evaluate Model
 
-\`\`\`bash
+```bash
 bash evaluate.sh
-\`\`\`
+```
 
 ---
 
@@ -207,7 +207,7 @@ bash evaluate.sh
 
 MQ-Det expects **COCO format** annotations:
 
-\`\`\`json
+```json
 {
   "images": [
     {
@@ -231,7 +231,7 @@ MQ-Det expects **COCO format** annotations:
     {"id": 1, "name": "object_name"}
   ]
 }
-\`\`\`
+```
 
 ### Converting Your Dataset
 
@@ -247,9 +247,9 @@ If you have a different format, use conversion tools:
 
 ### Step 1: Extract Vision Queries
 
-\`\`\`bash
+```bash
 ./extract_queries.sh
-\`\`\`
+```
 
 **What it does:**
 - Extracts visual features from training images
@@ -260,9 +260,9 @@ If you have a different format, use conversion tools:
 
 ### Step 2: Train Model
 
-\`\`\`bash
+```bash
 ./train.sh
-\`\`\`
+```
 
 **What it does:**
 - Finetunes pretrained GLIP-Tiny on your dataset
@@ -273,9 +273,9 @@ If you have a different format, use conversion tools:
 
 ### Step 3: Evaluate
 
-\`\`\`bash
+```bash
 ./evaluate.sh
-\`\`\`
+```
 
 **What it does:**
 - Evaluates trained model on validation set
@@ -312,9 +312,9 @@ If you have a different format, use conversion tools:
 
 ### Main Config File
 
-\`configs/pretrain/mq-glip-t_connectors.yaml\`
+`configs/pretrain/mq-glip-t_connectors.yaml`
 
-\`\`\`yaml
+```yaml
 SOLVER:
   MAX_EPOCH: 10              # Number of training epochs
   IMS_PER_BATCH: 2          # Batch size (GPU memory)
@@ -324,7 +324,7 @@ SOLVER:
 INPUT:
   MIN_SIZE_TRAIN: 640       # Reduce if OOM
   MAX_SIZE_TRAIN: 1024      # Reduce if OOM
-\`\`\`
+```
 
 ---
 
@@ -334,10 +334,10 @@ INPUT:
 
 | Component | Hourly Cost | Daily Cost (8hrs) | Monthly (160hrs) |
 |-----------|-------------|-------------------|------------------|
-| T4 GPU | \$0.35 | \$2.80 | \$56 |
-| n1-standard-4 CPU | \$0.19 | \$1.52 | \$30.40 |
-| 100GB SSD | \$0.017 | \$0.14 | \$2.72 |
-| **Total** | **\$0.56** | **\$4.46** | **\$89.12** |
+| T4 GPU | $0.35 | $2.80 | $56 |
+| n1-standard-4 CPU | $0.19 | $1.52 | $30.40 |
+| 100GB SSD | $0.017 | $0.14 | $2.72 |
+| **Total** | **$0.56** | **$4.46** | **$89.12** |
 
 ### Cost-Saving Tips
 
@@ -354,28 +354,28 @@ INPUT:
 
 Reduce batch size and image size:
 
-\`\`\`yaml
+```yaml
 SOLVER:
   IMS_PER_BATCH: 1  # Down from 2
 
 INPUT:
   MIN_SIZE_TRAIN: 512
   MAX_SIZE_TRAIN: 800
-\`\`\`
+```
 
 ### Dataset Not Found
 
 Ensure dataset is registered in:
-1. \`DATASET/your_dataset/__init__.py\`
-2. \`maskrcnn_benchmark/config/paths_catalog.py\`
+1. `DATASET/your_dataset/__init__.py`
+2. `maskrcnn_benchmark/config/paths_catalog.py`
 
 ### Docker Container Not Running
 
-\`\`\`bash
+```bash
 docker compose up -d
 docker compose ps
 docker compose logs -f
-\`\`\`
+```
 
 ---
 
@@ -383,11 +383,11 @@ docker compose logs -f
 
 MQ-Det uses **vision queries** to improve object detection:
 
-\`\`\`
+```
 Input Image → Backbone (Swin-T) → RPN → DYHEAD → Detection
                                      ↑
                               Vision Query Bank
-\`\`\`
+```
 
 **Key Components:**
 - **RPN_ONLY**: Faster inference
@@ -411,7 +411,7 @@ Input Image → Backbone (Swin-T) → RPN → DYHEAD → Detection
 
 If you use this code, please cite the original MQ-Det paper:
 
-\`\`\`bibtex
+```bibtex
 @article{xu2024multi,
   title={Multi-modal queried object detection in the wild},
   author={Xu, Yifan and Zhang, Mengdan and Fu, Chaoyou and Chen, Peixian and Yang, Xiaoshan and Li, Ke and Xu, Changsheng},
@@ -419,13 +419,13 @@ If you use this code, please cite the original MQ-Det paper:
   volume={36},
   year={2024}
 }
-\`\`\`
+```
 
 **This Docker Implementation:**
-\`\`\`
+```
 MQ-Det Docker Pipeline by @Sasmik23
 https://github.com/Sasmik23/mq-det-docker
-\`\`\`
+```
 
 ---
 
