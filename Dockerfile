@@ -15,7 +15,6 @@ ENV FORCE_CUDA=1
 # Install system dependencies and Python 3.9 (Ubuntu 20.04 default)
 RUN apt-get update && apt-get install -y \
     python3.9 \
-    python3.9-pip \
     python3.9-dev \
     python3.9-distutils \
     python3-pip \
@@ -33,10 +32,11 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
-# Set Python 3.9 as default python
+# Set Python 3.9 as default python and install pip
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1 && \
-    ln -sf /usr/bin/python3.9 /usr/bin/python3
+    ln -sf /usr/bin/python3.9 /usr/bin/python3 && \
+    curl https://bootstrap.pypa.io/get-pip.py | python3.9
 
 # Upgrade pip for Python 3.9
 RUN python3.9 -m pip install --upgrade pip setuptools wheel
@@ -85,7 +85,7 @@ RUN cd MODEL && \
     wget -q https://huggingface.co/GLIPModel/GLIP/resolve/main/glip_tiny_model_o365_goldg_cc_sbu.pth
 
 # Set Python path
-ENV PYTHONPATH=/workspace:$PYTHONPATH
+ENV PYTHONPATH=/workspace:${PYTHONPATH:-}
 
 # Create entrypoint script
 RUN echo '#!/bin/bash\n\
