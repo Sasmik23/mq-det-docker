@@ -82,10 +82,17 @@ ENV CUDA_LIBRARIES=/usr/local/cuda/lib64
 RUN nvcc --version && \
     python3.9 -c "import torch; print(f'PyTorch CUDA: {torch.version.cuda}'); print(f'CUDA available: {torch.cuda.is_available()}')"
 
+# Install additional build dependencies for GLIP
+RUN python3.9 -m pip install \
+    pybind11 \
+    build \
+    wheel
+
 # Build GLIP's bundled maskrcnn_benchmark (more compatible with GLIP/MQ-Det)
 RUN git clone --depth 1 https://github.com/microsoft/GLIP.git /tmp/GLIP && \
     cd /tmp/GLIP && \
-    python3.9 setup.py build develop && \
+    # Install GLIP without PEP 517 to avoid build issues
+    python3.9 -m pip install -e . --no-build-isolation && \
     cd /workspace && \
     rm -rf /tmp/GLIP
 
