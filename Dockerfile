@@ -19,6 +19,8 @@ RUN apt-get update && apt-get install -y \
     git wget curl vim pkg-config \
     build-essential cmake ninja-build \
     libjpeg-dev zlib1g-dev libpng-dev \
+    # OpenGL/OpenCV system dependencies (fixes cv2 libGL.so.1 error)
+    libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev \
     gcc-8 g++-8 \
  && add-apt-repository ppa:deadsnakes/ppa -y \
  && apt-get update && apt-get install -y \
