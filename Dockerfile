@@ -12,15 +12,13 @@ ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 ENV TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6"
 ENV FORCE_CUDA=1
 
-# Install system dependencies and Python 3.9 (exact paper version)
+# Install system dependencies and Python 3.9 (Ubuntu 20.04 default)
 RUN apt-get update && apt-get install -y \
-    software-properties-common \
-    && add-apt-repository ppa:deadsnakes/ppa \
-    && apt-get update && apt-get install -y \
     python3.9 \
     python3.9-pip \
     python3.9-dev \
     python3.9-distutils \
+    python3-pip \
     git \
     wget \
     curl \
@@ -33,22 +31,22 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender-dev \
     libgl1-mesa-glx \
-    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set Python 3.9 as default python
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1 && \
+    ln -sf /usr/bin/python3.9 /usr/bin/python3
 
-# Upgrade pip
-RUN pip3 install --upgrade pip setuptools wheel
+# Upgrade pip for Python 3.9
+RUN python3.9 -m pip install --upgrade pip setuptools wheel
 
 # Install PyTorch 2.0.1 with CUDA 11.7 support (exact paper implementation)
-RUN pip3 install torch==2.0.1+cu117 torchvision==0.15.2+cu117 torchaudio==2.0.2+cu117 \
+RUN python3.9 -m pip install torch==2.0.1+cu117 torchvision==0.15.2+cu117 torchaudio==2.0.2+cu117 \
     --extra-index-url https://download.pytorch.org/whl/cu117
 
 # Install essential Python packages
-RUN pip3 install \
+RUN python3.9 -m pip install \
     cython \
     ninja \
     yacs \
