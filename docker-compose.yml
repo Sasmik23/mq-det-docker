@@ -1,8 +1,10 @@
 services:
   mq-det:
     build: .
-    # modern compose doesn’t need the top-level "version" key; removing silences the warning
+    # modern compose doesn't need the top-level "version" key; removing silences the warning
     runtime: nvidia
+    shm_size: "2g"
+    ipc: host  # Fix: Share host IPC namespace for DataLoader shared memory
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - CUDA_VISIBLE_DEVICES=0
