@@ -43,10 +43,13 @@ DATASETS:
   TEST: ("connectors_grounding_val",)     # NOTE: use connectors validation dataset for evaluation
 
 INPUT:
-  MIN_SIZE_TRAIN: (320, 352, 384, 416, 448, 480, 512)
+  MIN_SIZE_TRAIN: 800  # Single size (multi-scale handled by AUGMENT.MULT_MIN_SIZE_TRAIN)
   MAX_SIZE_TRAIN: 1333
   MIN_SIZE_TEST: 800
   MAX_SIZE_TEST: 1333
+
+AUGMENT:
+  MULT_MIN_SIZE_TRAIN: (320, 352, 384, 416, 448, 480, 512)  # Multi-scale training sizes
 
 DATALOADER:
   SIZE_DIVISIBILITY: 32
