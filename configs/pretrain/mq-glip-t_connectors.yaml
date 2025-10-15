@@ -10,7 +10,7 @@ MODEL:
     CONV_BODY: "SWINT-FPN"  # Fixed: Use registered backbone name
     OUT_CHANNELS: 256
   SWINT:
-    VERSION: "vl"  # Vision-language version for GLIP
+    VERSION: "v1"  # Vision-only version for extract_query (vl not supported)
   FPN:
     USE_GN: True
     USE_RELU: True
