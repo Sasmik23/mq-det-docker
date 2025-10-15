@@ -7,6 +7,7 @@ services:
       - NVIDIA_VISIBLE_DEVICES=all
       - CUDA_VISIBLE_DEVICES=0
       - PYTHONPATH=/workspace
+      - DATASET=/workspace/DATASET  # Path resolution for datasets
     volumes:
       - ./DATASET:/workspace/DATASET
       - ./OUTPUT:/workspace/OUTPUT
