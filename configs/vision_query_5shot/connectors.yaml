@@ -1,6 +1,6 @@
 DATASETS:
   TEST: ("connectors_grounding_val",)
-  TRAIN_DATASETNAME_SUFFIX: "_vision_query"
+  TRAIN_DATASETNAME_SUFFIX: ""
   TEST_DATASETNAME_SUFFIX: ""
   FEW_SHOT: 0
 
