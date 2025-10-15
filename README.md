@@ -1,6 +1,10 @@
-# MQ-Det Docker - Official Implementation on AWS EC2
+# MQ-Det Docker - Official Paper Implementation
 
-Complete Docker setup for authentic MQ-Det (Multi-modal Queried Object Detection) implementation with CUDA 11.8 support.
+Complete Docker setup for authentic MQ-Det (Multi-modal Queried Object Detection) with exact paper environment:
+- **Python**: 3.9
+- **PyTorch**: 2.0.1  
+- **CUDA**: 11.7
+- **GCC**: 8.3.1
 
 ## 🚀 Quick Cloud Deployment
 
@@ -52,12 +56,16 @@ scp -i your-key.pem -r DATASET/ ubuntu@your-ec2-ip:~/mq-det-docker/
 # Start Docker container
 sudo docker-compose up -d
 
-# Enter container and run official MQ-Det
+# Enter container and run official MQ-Det workflow
 sudo docker exec -it mq-det-docker_mq-det_1 /bin/bash
-./extract_queries.sh  # Extract vision queries
-./train.sh           # Official training
-./evaluate.sh        # Evaluation
+
+# Inside container:
+./extract_queries.sh  # Extract vision queries (5-10 min)
+./train.sh           # Official training (2-3 hours) 
+./evaluate.sh        # Evaluation (5-10 min)
 ```
+
+**📋 See [COMPLETE_WORKFLOW.md](COMPLETE_WORKFLOW.md) for detailed step-by-step process**
 
 ### Step 4: Download Results
 ```bash
@@ -71,7 +79,7 @@ scp -i your-key.pem -r ubuntu@your-ec2-ip:~/mq-det-docker/OUTPUT/ ./
 ## 📁 Repository Structure
 
 ```
-├── Dockerfile                   # Official MQ-Det environment with CUDA 11.8
+├── Dockerfile                   # Official MQ-Det environment (CUDA 11.7 + PyTorch 2.0.1)
 ├── docker-compose.yml          # Easy deployment configuration
 ├── aws_setup.sh               # Automated AWS EC2 setup script
 ├── gcp_setup.sh               # Automated GCP setup script  
@@ -80,6 +88,7 @@ scp -i your-key.pem -r ubuntu@your-ec2-ip:~/mq-det-docker/OUTPUT/ ./
 ├── evaluate.sh               # Finetuning-free evaluation
 ├── configs/                   # Training configurations
 ├── MQ_Det_Complete_Pipeline.ipynb  # Google Colab version
+├── COMPLETE_WORKFLOW.md       # Detailed step-by-step workflow
 ├── GCP_DEPLOYMENT.md          # Detailed GCP guide
 └── AWS_RECOMMENDATION.md      # Detailed AWS guide (legacy)
 ```
@@ -95,13 +104,14 @@ scp -i your-key.pem -r ubuntu@your-ec2-ip:~/mq-det-docker/OUTPUT/ ./
 
 ## 🎯 Expected Results
 - **Accuracy**: 85-95% (vs 77.78% with compatible implementation)
-- **Implementation**: 100% Official MQ-Det methodology
-- **CUDA**: Native 11.8 (no compatibility layers)
+- **Implementation**: 100% Official MQ-Det methodology (exact paper environment)
+- **CUDA**: Native 11.7 with PyTorch 2.0.1 (no compatibility layers)
 - **Cost**: $0.30-2.00 total (vs free but limited Colab)
 
 ## 🔧 Technical Details
-- **Base**: NVIDIA CUDA 11.8 + PyTorch 1.13.1
-- **GPU Support**: V100, A100, H100 compatible  
+- **Base**: NVIDIA CUDA 11.7 + PyTorch 2.0.1 (exact paper implementation)
+- **Python**: 3.9 with GCC 8.3.1 support
+- **GPU Support**: T4, V100, A100, H100 compatible  
 - **Dependencies**: maskrcnn-benchmark, transformers, GLIP-T
 - **Dataset Format**: COCO format with connector categories
 
@@ -160,7 +170,7 @@ This evaluates the trained model using vision queries for finetuning-free detect
 - **Vision Query Extraction**: Automated extraction from training images
 - **Modulated Pre-training**: Official MQ-Det methodology with vision-language fusion
 - **Finetuning-free Evaluation**: Zero-shot detection on new images using learned queries
-- **CUDA 11.8 Native**: No compatibility layers, full performance
+- **CUDA 11.7 Native**: Exact paper environment, no compatibility layers, full performance
 
 ---
 

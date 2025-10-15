@@ -62,7 +62,9 @@ chmod +x gcp_setup.sh
 
 ## 🔧 **Technical Specifications**
 
-- **OS**: Ubuntu 20.04 with CUDA 11.8 pre-installed
+- **OS**: Ubuntu 20.04 with CUDA 11.7 pre-installed
+- **Python**: 3.9 (exact paper implementation)
+- **PyTorch**: 2.0.1 with CUDA 11.7 support
 - **GPU**: NVIDIA Tesla T4 (16GB VRAM)
 - **Docker**: NVIDIA Docker runtime included
 - **Storage**: 100GB persistent disk

@@ -1,22 +1,26 @@
-# Official MQ-Det Docker Environment
-# Base image with CUDA 11.8 and PyTorch pre-installed
-FROM nvidia/cuda:11.8-cudnn8-devel-ubuntu20.04
+# Official MQ-Det Docker Environment - Paper Implementation
+# Exact paper environment: python==3.9, torch==2.0.1, GCC==8.3.1, CUDA==11.7
+FROM nvidia/cuda:11.7-cudnn8-devel-ubuntu20.04
 
 # Prevent interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Set CUDA environment variables
+# Set CUDA environment variables for CUDA 11.7
 ENV CUDA_HOME=/usr/local/cuda
 ENV PATH=/usr/local/cuda/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 ENV TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6"
 ENV FORCE_CUDA=1
 
-# Install system dependencies
+# Install system dependencies and Python 3.9 (exact paper version)
 RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    python3-dev \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y \
+    python3.9 \
+    python3.9-pip \
+    python3.9-dev \
+    python3.9-distutils \
     git \
     wget \
     curl \
@@ -32,15 +36,16 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create symbolic link for python
-RUN ln -sf /usr/bin/python3 /usr/bin/python
+# Set Python 3.9 as default python
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
 
 # Upgrade pip
 RUN pip3 install --upgrade pip setuptools wheel
 
-# Install PyTorch with CUDA 11.8 support (official MQ-Det compatible)
-RUN pip3 install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1+cu116 \
-    --extra-index-url https://download.pytorch.org/whl/cu116
+# Install PyTorch 2.0.1 with CUDA 11.7 support (exact paper implementation)
+RUN pip3 install torch==2.0.1+cu117 torchvision==0.15.2+cu117 torchaudio==2.0.2+cu117 \
+    --extra-index-url https://download.pytorch.org/whl/cu117
 
 # Install essential Python packages
 RUN pip3 install \

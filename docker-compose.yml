@@ -7,18 +7,28 @@ services:
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - CUDA_VISIBLE_DEVICES=0
+      - PYTHONPATH=/workspace
     volumes:
       # Mount your dataset directory
       - ./DATASET:/workspace/DATASET
       # Mount output directory for models
       - ./OUTPUT:/workspace/OUTPUT
-      # Mount configs for custom configurations
-      - ./configs:/workspace/configs/custom
-      # Mount for development (optional)
-      - .:/workspace/src
+      # Mount model directory for weights
+      - ./MODEL:/workspace/MODEL
+      # Mount configs
+      - ./configs:/workspace/configs
+      # Mount tools and scripts
+      - ./tools:/workspace/tools
+      - ./maskrcnn_benchmark:/workspace/maskrcnn_benchmark
+      - ./groundingdino_new:/workspace/groundingdino_new
+      # Mount shell scripts
+      - ./extract_queries.sh:/workspace/extract_queries.sh
+      - ./train.sh:/workspace/train.sh
+      - ./evaluate.sh:/workspace/evaluate.sh
     ports:
       - "8888:8888"  # Jupyter notebook (if needed)
       - "6006:6006"  # TensorBoard
     stdin_open: true
     tty: true
+    working_dir: /workspace
     command: /bin/bash

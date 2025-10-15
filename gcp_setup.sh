@@ -53,7 +53,7 @@ fi
 
 # Test NVIDIA Docker
 echo "🧪 Testing NVIDIA Docker setup..."
-if sudo docker run --rm --gpus all nvidia/cuda:11.8-base-ubuntu20.04 nvidia-smi; then
+if sudo docker run --rm --gpus all nvidia/cuda:11.7-base-ubuntu20.04 nvidia-smi; then
     echo "✅ NVIDIA Docker working correctly"
 else
     echo "❌ NVIDIA Docker test failed"
