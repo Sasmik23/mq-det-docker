@@ -33,9 +33,8 @@ mkdir -p OUTPUT/connectors_evaluation
 # Run evaluation with vision queries
 echo "🎯 Running MQ-Det Evaluation..."
 
-# Evaluate with finetuning-free approach
-python3.9 -m torch.distributed.launch --nproc_per_node=1 \
-    tools/test_grounding_net.py \
+# Evaluate with finetuning-free approach (single GPU, no distributed launch)
+python3.9 tools/test_grounding_net.py \
     --config-file configs/pretrain/mq-glip-t_connectors.yaml \
     --additional_model_config configs/vision_query_5shot/connectors.yaml \
     VISION_QUERY.QUERY_BANK_PATH MODEL/connectors_query_5_pool7_sel_tiny.pth \
