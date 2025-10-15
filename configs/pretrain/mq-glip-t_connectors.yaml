@@ -83,9 +83,8 @@ SOLVER:
   WARMUP_FACTOR: 0.001
   USE_AMP: True
   MODEL_EMA: 0.999
-  CHECKPOINT_PER_EPOCH: 0.25   # one checkpoint every 4 epochs
+  CHECKPOINT_PER_EPOCH: 0.2   # one checkpoint every 5 epochs (2 checkpoints total for 10 epochs)
   CHECKPOINT_PERIOD: 99999999  # keep large, we use per-epoch cadence
-  TUNING_HIGHLEVEL_OVERRIDE: "vision_query"
   TUNING_HIGHLEVEL_OVERRIDE: "vision_query"
   CLIP_GRADIENTS:
     ENABLED: True
