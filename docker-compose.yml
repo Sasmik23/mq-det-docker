@@ -1,27 +1,26 @@
 services:
   mq-det:
     build: .
-    # For Compose V2, this is enough if Docker has the NVIDIA runtime configured
+    # modern compose doesn’t need the top-level "version" key; removing silences the warning
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - CUDA_VISIBLE_DEVICES=0
       - PYTHONPATH=/workspace
-      - TORCH_CUDA_ARCH_LIST=7.5
     volumes:
-      # Keep compiled extension inside the image; mount only data & outputs
       - ./DATASET:/workspace/DATASET
       - ./OUTPUT:/workspace/OUTPUT
       - ./MODEL:/workspace/MODEL
       - ./configs:/workspace/configs
       - ./tools:/workspace/tools
+      - ./maskrcnn_benchmark:/workspace/maskrcnn_benchmark
+      - ./groundingdino_new:/workspace/groundingdino_new
       - ./extract_queries.sh:/workspace/extract_queries.sh
       - ./train.sh:/workspace/train.sh
       - ./evaluate.sh:/workspace/evaluate.sh
     ports:
-      - "8888:8888"  # Jupyter if you use it
-      - "6006:6006"  # TensorBoard
-    ipc: host          # larger shared memory for data loaders
+      - "8888:8888"
+      - "6006:6006"
     stdin_open: true
     tty: true
     working_dir: /workspace

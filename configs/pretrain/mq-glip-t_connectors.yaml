@@ -22,7 +22,7 @@ MODEL:
     POST_NMS_TOP_N_TEST: 1000
     FPN_POST_NMS_TOP_N_TRAIN: 1000
     FPN_POST_NMS_TOP_N_TEST: 1000
-    RPN_MID_CHANNEL: 256
+    # RPN_MID_CHANNEL: 256  # Not supported in this maskrcnn-benchmark version
   ROI_HEADS:
     USE_FPN: True
     POSITIVE_FRACTION: 0.5
