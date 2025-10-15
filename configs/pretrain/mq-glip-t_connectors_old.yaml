@@ -1,0 +1,98 @@
+MODEL:
+  META_ARCHITECTURE: "GeneralizedVLRCNN_New"  # Fixed: Use registered architecture name
+  WEIGHT: "MODEL/glip_tiny_model_o365_goldg_cc_sbu.pth" # path to GLIP-T model
+  RPN_ONLY: True  # MQ-Det uses RPN-based detection
+  RPN_ARCHITECTURE: "VLDYHEAD"  # Vision-language dynamic head
+  LANGUAGE_BACKBONE:
+    FREEZE: False
+    MODEL_TYPE: "bert-base-uncased"
+    TOKENIZER_TYPE: "bert-base-uncased"
+    MASK_SPECIAL: False
+  BACKBONE:
+    CONV_BODY: "SWINT-FPN-RETINANET"  # RetinaNet-style FPN for RPN_ONLY mode
+    OUT_CHANNELS: 256
+    FREEZE_CONV_BODY_AT: -1
+    USE_GN: True
+    USE_RELU: True
+  RPN:
+    USE_FPN: True
+    ANCHOR_SIZES: (32, 64, 128, 256, 512)
+    ANCHOR_STRIDE: (4, 8, 16, 32, 64)
+    ASPECT_RATIOS: (0.23232838, 0.63365731, 1.28478321, 3.15089189)
+    PRE_NMS_TOP_N_TRAIN: 2000
+    PRE_NMS_TOP_N_TEST: 1000
+    POST_NMS_TOP_N_TRAIN: 1000
+    POST_NMS_TOP_N_TEST: 1000
+    FPN_POST_NMS_TOP_N_TRAIN: 1000
+    FPN_POST_NMS_TOP_N_TEST: 1000
+    # RPN_MID_CHANNEL: 256  # Not supported in this maskrcnn-benchmark version
+  ROI_HEADS:
+    USE_FPN: True
+    POSITIVE_FRACTION: 0.5
+    BG_IOU_THRESHOLD: 0.5
+    BATCH_SIZE_PER_IMAGE: 512
+    DETECTIONS_PER_IMG: 100
+    # NMS_FILTER_DUPLICATES: True  # Not supported in this maskrcnn-benchmark version
+  ROI_BOX_HEAD:
+    POOLER_RESOLUTION: 7
+    POOLER_SCALES: (0.25, 0.125, 0.0625, 0.03125)
+    POOLER_SAMPLING_RATIO: 2
+    FEATURE_EXTRACTOR: "FPN2MLPFeatureExtractor"
+    PREDICTOR: "FPNPredictor"
+    NUM_CLASSES: 256 # one for each class, will be dynamically changed to the number of classes in the dataset
+
+DATASETS:
+  TRAIN: ("connectors_grounding_train",)  # NOTE: use connectors training dataset
+  TEST: ("connectors_grounding_val",)     # NOTE: use connectors validation dataset for evaluation
+
+INPUT:
+  MIN_SIZE_TRAIN: 800  # Single size (multi-scale handled by AUGMENT.MULT_MIN_SIZE_TRAIN)
+  MAX_SIZE_TRAIN: 1333
+  MIN_SIZE_TEST: 800
+  MAX_SIZE_TEST: 1333
+
+AUGMENT:
+  MULT_MIN_SIZE_TRAIN: (320, 352, 384, 416, 448, 480, 512)  # Multi-scale training sizes
+
+DATALOADER:
+  SIZE_DIVISIBILITY: 32
+
+SOLVER:
+  OPTIMIZER: "ADAMW"
+  BASE_LR: 0.00001  # NOTE: reduced learning rate for small dataset
+  LANG_LR: 0.00001
+  WEIGHT_DECAY: 0.0001
+  STEPS: (0.67, 0.89)
+  MAX_ITER: 1000    # NOTE: reduced iterations for small dataset
+  IMS_PER_BATCH: 4   # NOTE: smaller batch size for limited GPU memory
+  WARMUP_ITERS: 100  # NOTE: reduced warmup
+  WARMUP_FACTOR: 0.1
+  WARMUP_METHOD: "linear"
+  CHECKPOINT_PERIOD: 500
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_TYPE: "norm"
+    CLIP_VALUE: 1.0
+    NORM_TYPE: 2.0
+
+GLIPKNOW:
+  PARALLEL_LANGUAGE_INPUT: False  # Disabled - no knowledge base for connectors dataset
+  LAN_FEATURE_AGG_TYPE: "first"
+  KNOWLEDGE_FILE: ""
+  KNOWLEDGE_TYPE: ""
+
+TEST:
+  EVAL_TASK: 'detection'
+  CHUNKED_EVALUATION: -1
+  IMS_PER_BATCH: 4
+
+# NOTE: Vision query settings for connectors
+VISION_QUERY:
+  ENABLED: True
+  MAX_QUERY_NUMBER: 5000              # NOTE: max vision queries per category in the bank
+  NUM_QUERY_PER_CLASS: 5              # NOTE: number of queries used per category during training
+  QUERY_BANK_PATH: "MODEL/connectors_query_5000_sel_tiny.pth"  # NOTE: path to vision query bank
+  MASK_DURING_INFERENCE: False
+  TEXT_DROPOUT: 0.0
+
+OUTPUT_DIR: 'OUTPUT/MQ-GLIP-TINY-CONNECTORS/'
