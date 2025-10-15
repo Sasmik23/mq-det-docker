@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender-dev \
     libgl1-mesa-glx \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # Set Python 3.9 as default python and install pip
@@ -70,12 +71,23 @@ WORKDIR /workspace
 RUN git clone https://github.com/YifanXu74/MQ-Det.git . && \
     chmod +x tools/*.py
 
-# Install maskrcnn-benchmark from source with proper CUDA support
-RUN git clone https://github.com/facebookresearch/maskrcnn-benchmark.git /tmp/maskrcnn && \
-    cd /tmp/maskrcnn && \
-    python setup.py build develop && \
+# Install maskrcnn-benchmark from GLIP (more compatible with MQ-Det)
+# Set additional CUDA environment variables for compilation
+ENV CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda
+ENV CUDA_BIN_PATH=/usr/local/cuda/bin
+ENV CUDA_INCLUDE_DIRS=/usr/local/cuda/include
+ENV CUDA_LIBRARIES=/usr/local/cuda/lib64
+
+# Verify CUDA installation before building
+RUN nvcc --version && \
+    python3.9 -c "import torch; print(f'PyTorch CUDA: {torch.version.cuda}'); print(f'CUDA available: {torch.cuda.is_available()}')"
+
+# Build GLIP's bundled maskrcnn_benchmark (more compatible with GLIP/MQ-Det)
+RUN git clone --depth 1 https://github.com/microsoft/GLIP.git /tmp/GLIP && \
+    cd /tmp/GLIP/maskrcnn_benchmark && \
+    python3.9 setup.py build develop && \
     cd /workspace && \
-    rm -rf /tmp/maskrcnn
+    rm -rf /tmp/GLIP
 
 # Create necessary directories
 RUN mkdir -p MODEL DATASET OUTPUT configs/custom
