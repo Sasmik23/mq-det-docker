@@ -1,6 +1,6 @@
 # Official MQ-Det Docker Environment - Paper Implementation (Optimized for smaller disk)
 # Exact paper environment: python==3.9, torch==2.0.1, GCC==8.3.1, CUDA==11.7
-FROM nvidia/cuda:11.7-runtime-ubuntu20.04
+FROM nvidia/cuda:11.7.1-cudnn8-devel-ubuntu20.04
 
 # Prevent interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive

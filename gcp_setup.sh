@@ -26,10 +26,23 @@ else
     echo "Current sources:"
     cat /etc/apt/sources.list
     
-    # Add non-free repositories explicitly
-    echo "deb http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
-    echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
-    echo "deb http://deb.debian.org/debian/ bookworm-updates main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
+    # Add non-free repositories using .sources file (avoids duplicates)
+    if [ ! -f /etc/apt/sources.list.d/debian-nonfree.sources ]; then
+        sudo tee /etc/apt/sources.list.d/debian-nonfree.sources > /dev/null <<EOF
+Types: deb
+URIs: http://deb.debian.org/debian/
+Suites: bookworm bookworm-updates
+Components: main contrib non-free non-free-firmware
+
+Types: deb
+URIs: http://security.debian.org/debian-security
+Suites: bookworm-security
+Components: main contrib non-free non-free-firmware
+EOF
+        echo "✅ Added non-free repositories"
+    else
+        echo "✅ Non-free repositories already configured"
+    fi
     
     sudo apt-get update
     
@@ -66,15 +79,15 @@ fi
 # Install NVIDIA Container Toolkit
 echo "🐳 Setting up NVIDIA Container Toolkit..."
 if ! dpkg -l | grep -q nvidia-container-toolkit; then
-    # Use the generic deb repository for NVIDIA Container Toolkit
+    # Use the correct NVIDIA Container Toolkit repository
     echo "📦 Installing NVIDIA Container Toolkit for Debian..."
     
     # Download and add the GPG key
     curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
     
-    # Add the repository using the generic deb method
-    echo "deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://nvidia.github.io/libnvidia-container/stable/deb/$(dpkg --print-architecture) /" | \
-        sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+    # Add the repository using the correct generic URL
+    echo "deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://nvidia.github.io/libnvidia-container/stable/deb/amd64 /" | \
+        sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list > /dev/null
     
     # Update package lists and install
     sudo apt-get update
@@ -90,10 +103,10 @@ fi
 
 # Test NVIDIA Docker with exact paper environment
 echo "🧪 Testing NVIDIA Docker with exact paper specs..."
-if sudo docker run --rm --gpus all nvidia/cuda:11.7.1-devel-ubuntu20.04 nvidia-smi; then
-    echo "✅ NVIDIA Docker working with CUDA 11.7"
+if sudo docker run --rm --gpus all nvidia/cuda:11.7.1-cudnn8-devel-ubuntu20.04 nvidia-smi; then
+    echo "✅ NVIDIA Docker working with CUDA 11.7.1 + cuDNN 8"
 else
-    echo "⚠️  CUDA 11.7.1 image not found, trying alternative..."
+    echo "⚠️  CUDA 11.7.1-cudnn8 image not found, trying runtime version..."
     if sudo docker run --rm --gpus all nvidia/cuda:11.7-runtime-ubuntu20.04 nvidia-smi; then
         echo "✅ NVIDIA Docker working with CUDA 11.7 runtime"
     else
