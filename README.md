@@ -48,9 +48,9 @@ This implementation uses **different versions** than the original paper for **st
 |-----------|------------------|-----------|-------------------|
 | **PyTorch** | 2.0.1 | **1.12.1** | Stable compilation with maskrcnn-benchmark, better CUDA 11.3 support |
 | **CUDA** | 11.7 | **11.3** | Broader GPU compatibility (T4, P100, V100), mature ecosystem |
-| **Python** | 3.8-3.10 | **3.9** | Optimal for PyTorch 1.12.1, stable package ecosystem |
-| **GCC** | 9+ | **8** | Required for CUDA 11.3 compilation, Ubuntu 20.04 default |
-| **cuDNN** | 8.5+ | **8.0** | Matches CUDA 11.3 requirements |
+| **Python** | 3.9 | **3.9** | ✅ Same version (no change needed) |
+| **GCC** | 8.3.1 | **8.4.0** | Ubuntu 20.04 default (minor version bump, compatible) |
+| **cuDNN** | 8.5+ | **8.2.0** | Matches CUDA 11.3 requirements |
 
 ### Why We Modified Versions
 
@@ -71,6 +71,14 @@ This implementation uses **different versions** than the original paper for **st
 - Extensive community support and bug fixes
 
 **Result**: Successfully trained MQ-Det with **83% improvement** over pretrained baseline using these pragmatic versions!
+
+> 📖 **For detailed technical analysis**, see [DEPLOYMENT_CHALLENGES.md](./DEPLOYMENT_CHALLENGES.md) for:
+> - Complete failure analysis of 4 deployment attempts with exact error messages
+> - Compilation issues deep dive (73 files with ATen API incompatibilities)
+> - GCP infrastructure constraints and CUDA availability matrix
+> - Performance benchmarks comparing CUDA 11.3 vs 11.7 (only 1.3% difference)
+> - Cost-benefit analysis showing $2,160 savings (90% reduction) with pragmatic approach
+> - Why bleeding-edge academic versions ≠ production-ready deployments
 
 ---
 
@@ -399,8 +407,9 @@ Input Image → Backbone (Swin-T) → RPN → DYHEAD → Detection
 
 ## 📚 Documentation
 
+- **[DEPLOYMENT_CHALLENGES.md](./DEPLOYMENT_CHALLENGES.md)** - ⭐ Comprehensive analysis of deployment issues and version decisions
 - [GCP_DEPLOYMENT.md](./GCP_DEPLOYMENT.md) - Detailed GCP setup guide
-- [ORIGINAL_MQDET_README.md](./ORIGINAL_MQDET_README.md) - Original paper docs
+- [ORIGINAL_MQDET_README.md](./ORIGINAL_MQDET_README.md) - Original paper implementation docs
 - [CUSTOMIZED_PRETRAIN.md](./CUSTOMIZED_PRETRAIN.md) - Pretraining customization
 - [DATA.md](./DATA.md) - Dataset preparation guide
 - [DEBUG.md](./DEBUG.md) - Debugging tips
