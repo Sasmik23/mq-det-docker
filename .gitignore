@@ -11,3 +11,4 @@ odinw-img-logs/
 other_log/
 vs_downstream_log/
 vs_final_downstream_log/
+.venv/

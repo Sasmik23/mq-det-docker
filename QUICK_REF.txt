@@ -1,0 +1,188 @@
+╔════════════════════════════════════════════════════════════════════════╗
+║                   MQ-Det Deployment Quick Reference                    ║
+║                        Two Paths: GCP | Air-Gap                        ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ STEP 1: RUN CLEANUP (2 minutes)                                        │
+└────────────────────────────────────────────────────────────────────────┘
+  cd c:\Users\Hmgics\Desktop\mq-det-docker
+  CLEANUP.bat
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ STEP 2: CHOOSE YOUR PATH                                               │
+└────────────────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────┐  ┌──────────────────────────────┐
+  │  GCP (with Internet)         │  │  AIR-GAP (no Internet)       │
+  ├──────────────────────────────┤  ├──────────────────────────────┤
+  │ ✅ Docker + Internet         │  │ ✅ Kubernetes Pod            │
+  │ ✅ Simple setup              │  │ ✅ A100 GPU                  │
+  │ ✅ Good for dev/test         │  │ ✅ Secure environment        │
+  │                              │  │ ✅ No internet needed        │
+  │ 📁 Use: gcp/                 │  │ 📁 Use: airgap/              │
+  └──────────────────────────────┘  └──────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ GCP WORKFLOW                                                            │
+└────────────────────────────────────────────────────────────────────────┘
+  
+  cd gcp
+
+  1️⃣  Setup (30 min)
+      ./gcp_setup.sh
+
+  2️⃣  Extract Queries (30-60 min)
+      ./extract_queries.sh
+
+  3️⃣  Train (2-8 hours)
+      ./train.sh
+
+  4️⃣  Evaluate (30-60 min)
+      ./evaluate.sh
+
+  📖 Guide: gcp/GCP_DEPLOYMENT.md
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ AIR-GAP WORKFLOW                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+
+  ┌─ ON WINDOWS (with Internet) ──────────────────────────────────────┐
+  │                                                                    │
+  │  cd airgap\1-prepare                                               │
+  │  prepare_offline_bundle.bat     ⏱ 30-60 min                       │
+  │                                                                    │
+  │  Output: mq-det-offline-bundle.tar.gz (5 GB)                       │
+  │                                                                    │
+  │  📖 Guide: airgap/1-prepare/PREPARE_BUNDLE.md                      │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌─ TRANSFER ────────────────────────────────────────────────────────┐
+  │                                                                    │
+  │  scp mq-det-offline-bundle.tar.gz 2300488@pod:/home/2300488/mik/  │
+  │                                                                    │
+  │  📖 Guide: airgap/2-transfer/TRANSFER_GUIDE.md                     │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌─ ON POD (One-Time Setup) ─────────────────────────────────────────┐
+  │                                                                    │
+  │  cd /home/2300488/mik                                              │
+  │  tar -xzf mq-det-offline-bundle.tar.gz                             │
+  │  cd mq-det-offline-bundle/airgap/3-setup                           │
+  │  ./install_on_pod.sh            ⏱ 15-30 min                       │
+  │                                                                    │
+  │  📖 Guide: airgap/3-setup/SETUP_GUIDE.md                           │
+  └────────────────────────────────────────────────────────────────────┘
+
+  ┌─ ON POD (Training) ───────────────────────────────────────────────┐
+  │                                                                    │
+  │  source airgap/3-setup/setup_environment.sh                        │
+  │  cd airgap/4-pipeline                                              │
+  │  ./run_full_pipeline.sh         ⏱ 3-10 hours                      │
+  │                                                                    │
+  │  Phases:                                                           │
+  │    ✅ Check environment (30s)                                      │
+  │    🧠 Extract queries (30-60 min)                                  │
+  │    🏋️ Train model (2-8 hours)                                      │
+  │    📊 Evaluate (30-60 min)                                         │
+  │                                                                    │
+  │  📖 Guide: airgap/4-pipeline/PIPELINE_GUIDE.md                     │
+  └────────────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ DATASET FORMAT (Both Paths)                                            │
+└────────────────────────────────────────────────────────────────────────┘
+
+  DATASET/connectors/
+  ├── annotations/
+  │   ├── instances_train_connectors.json
+  │   └── instances_val_connectors.json
+  └── images/
+      ├── train/
+      └── val/
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ OUTPUT (Both Paths)                                                     │
+└────────────────────────────────────────────────────────────────────────┘
+
+  MODEL/
+  ├── connectors_query_5000_sel_tiny.pth      ← Training queries
+  └── connectors_query_5_pool7_sel_tiny.pth   ← Eval queries
+
+  OUTPUT/
+  ├── MQ-GLIP-TINY-CONNECTORS/
+  │   └── model_final.pth                     ← Trained model
+  ├── training.log                            ← Training logs
+  └── evaluation.log                          ← Metrics & mAP
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ MONITORING                                                              │
+└────────────────────────────────────────────────────────────────────────┘
+
+  GCP:        docker-compose logs -f
+  Air-Gap:    tail -f OUTPUT/training.log
+
+  GPU:        nvidia-smi
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ TROUBLESHOOTING                                                         │
+└────────────────────────────────────────────────────────────────────────┘
+
+  Issue                          Solution
+  ────────────────────────────────────────────────────────────────────
+  CUDA kernel error              export TORCH_CUDA_ARCH_LIST="8.0"
+                                 Recompile: python setup_glip.py build
+
+  HuggingFace connection         export TRANSFORMERS_OFFLINE=1
+                                 export HF_HUB_OFFLINE=1
+
+  Out of memory                  Reduce batch size in config YAML
+
+  Training interrupted           Just re-run - auto-resumes from checkpoint
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ DOCUMENTATION                                                           │
+└────────────────────────────────────────────────────────────────────────┘
+
+  📖 START_HERE.md                 ← Complete cleanup summary
+  📖 README.md                     ← Main documentation
+  📖 VISUAL_GUIDE.md               ← Visual workflow diagrams
+  📖 CLEANUP_SUMMARY.md            ← What changed
+  📖 gcp/GCP_DEPLOYMENT.md         ← GCP complete guide
+  📖 airgap/AIRGAP_DEPLOYMENT.md   ← Air-gap master guide
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ SUCCESS CRITERIA                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+
+  ✅ Environment check passes
+  ✅ Query extraction creates .pth files
+  ✅ Training completes without errors
+  ✅ Evaluation shows AP > 0.5
+  ✅ Model file exists: OUTPUT/*/model_final.pth
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ EXPECTED RESULTS                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+
+  Metric                         Value
+  ────────────────────────────────────────────────────────────────────
+  First Run Accuracy             60-70% AP
+  Training Time                  2-8 hours
+  GPU Memory                     20-35 GB
+  Model Size                     ~140 MB
+  Query Bank Size                ~50 MB
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ NEED HELP?                                                              │
+└────────────────────────────────────────────────────────────────────────┘
+
+  1. Read START_HERE.md for complete overview
+  2. Check specific guide for your deployment path
+  3. Review VISUAL_GUIDE.md for workflow diagrams
+  4. See troubleshooting section in respective guide
+
+╔════════════════════════════════════════════════════════════════════════╗
+║                        🎉 READY TO DEPLOY! 🚀                          ║
+║                   Run CLEANUP.bat to get started                       ║
+╚════════════════════════════════════════════════════════════════════════╝

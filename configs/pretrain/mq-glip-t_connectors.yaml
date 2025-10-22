@@ -58,13 +58,17 @@ DATASETS:
   FEW_SHOT: 0
 
 INPUT:
-  MIN_SIZE_TRAIN: 640  # Reduced from 800 to save GPU memory
-  MAX_SIZE_TRAIN: 1024  # Reduced from 1333 to save GPU memory
-  MIN_SIZE_TEST: 640
-  MAX_SIZE_TEST: 1024
+  MIN_SIZE_TRAIN: 800  # Increased for better accuracy (A100 can handle it)
+  MAX_SIZE_TRAIN: 1333  # Standard resolution
+  MIN_SIZE_TEST: 800
+  MAX_SIZE_TEST: 1333
 
 AUGMENT:
-  MULT_MIN_SIZE_TRAIN: (480, 560, 640)  # Reduced scales to save memory
+  MULT_MIN_SIZE_TRAIN: (480, 560, 640, 720, 800)  # More scale variation
+  BRIGHTNESS: 0.2      # Add brightness augmentation
+  CONTRAST: 0.2        # Add contrast augmentation
+  SATURATION: 0.2      # Add color variation
+  HUE: 0.1             # Slight hue variation
 
 DATALOADER:
   SIZE_DIVISIBILITY: 32
@@ -73,17 +77,17 @@ DATALOADER:
 
 SOLVER:
   OPTIMIZER: "ADAMW"
-  BASE_LR: 0.00001  # Reduced for small dataset
-  LANG_LR: 0.00001
+  BASE_LR: 0.0001  # Reduced from 0.0002 (adjusted for smaller batch)
+  LANG_LR: 0.0001
   WEIGHT_DECAY: 0.0001
   STEPS: (0.67, 0.89)
-  MAX_EPOCH: 10  # Reduced for small dataset
-  IMS_PER_BATCH: 2  # Reduced to 2 to fit in GPU memory
-  WARMUP_ITERS: 50  # Reduced proportionally
+  MAX_EPOCH: 100  # Dramatically increased - small datasets need more epochs
+  IMS_PER_BATCH: 4  # Reduced from 8 to 4 for high resolution (800x1333)
+  WARMUP_ITERS: 200  # Longer warmup for stability
   WARMUP_FACTOR: 0.001
   USE_AMP: True
   MODEL_EMA: 0.999
-  CHECKPOINT_PER_EPOCH: 0.2   # one checkpoint every 5 epochs (2 checkpoints total for 10 epochs)
+  CHECKPOINT_PER_EPOCH: 0.1   # Save more frequently (every 10 epochs)
   CHECKPOINT_PERIOD: 99999999  # keep large, we use per-epoch cadence
   TUNING_HIGHLEVEL_OVERRIDE: "vision_query"
   CLIP_GRADIENTS:
@@ -102,9 +106,9 @@ VISION_QUERY:
   ENABLED: True
   QUERY_BANK_PATH: 'MODEL/connectors_query_5000_sel_tiny.pth'
   PURE_TEXT_RATE: 0.
-  TEXT_DROPOUT: 0.4
+  TEXT_DROPOUT: 0.3  # Reduced dropout to retain more information
   VISION_SCALE: 1.0
-  NUM_QUERY_PER_CLASS: 5
+  NUM_QUERY_PER_CLASS: 10  # Increased from 5 to 10 for better coverage
   RANDOM_KSHOT: False
   ADD_ADAPT_LAYER: False
   CONDITION_GATE: True
