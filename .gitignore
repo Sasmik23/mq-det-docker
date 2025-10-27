@@ -12,3 +12,14 @@ other_log/
 vs_downstream_log/
 vs_final_downstream_log/
 .venv/
+.mq-det-offline-bundle/
+mq-det-offline-bundle/
+mq-det-offline-bundle.zip
+*.log
+*.bak
+*.backup
+.DS_Store
+Thumbs.db
+hf_cache/
+timm_cache/
+.matplotlib/

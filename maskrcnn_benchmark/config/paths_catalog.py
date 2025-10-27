@@ -142,6 +142,18 @@ class DatasetCatalog(object):
             "ann_file": "connectors/annotations/instances_val_connectors.json",
             "is_train": False,
         },
+        # fd4_ini dataset
+        "fd4_ini_grounding_train": {
+            "img_dir": "fd4_ini/images/train",
+            "ann_file": "fd4_ini/annotations/instances_train_fd4.json",
+            "is_train": True,
+            "exclude_crowd": True,
+        },
+        "fd4_ini_grounding_val": {
+            "img_dir": "fd4_ini/images/val",
+            "ann_file": "fd4_ini/annotations/instances_val_fd4.json",
+            "is_train": False,
+        },
 
 
         # object365 tsv
@@ -403,7 +415,7 @@ class DatasetCatalog(object):
                     img_folder=os.path.join(img_dir, attrs["img_dir"]),
                     ann_file=os.path.join(ann_dir, attrs["ann_file"]),
                 )
-                if name in ["object365_grounding_train", 'coco_grounding_train_for_obj365', 'lvis_grounding_train_for_obj365', 'connectors_grounding_train', 'connectors_grounding_val']:
+                if name in ["object365_grounding_train", 'coco_grounding_train_for_obj365', 'lvis_grounding_train_for_obj365', 'connectors_grounding_train', 'connectors_grounding_val', 'fd4_ini_grounding_train', 'fd4_ini_grounding_val']:
                     return dict(
                         factory="CocoGrounding_New",
                         args=args,

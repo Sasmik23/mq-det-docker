@@ -10,6 +10,19 @@ echo MQ-Det Air-Gapped Deployment Bundle Preparation
 echo ==================================================
 echo.
 
+REM Navigate to project root (2 levels up from airgap/1-prepare/)
+cd ..\..
+if not exist "configs" (
+    echo ERROR: Not in project root directory!
+    echo Please run this script from: c:\Users\Hmgics\Desktop\mq-det-docker\airgap\1-prepare\
+    echo Or: cd to project root and run: airgap\1-prepare\prepare_offline_bundle.bat
+    pause
+    exit /b 1
+)
+
+echo [INFO] Working from project root: %CD%
+echo.
+
 REM Configuration
 set BUNDLE_NAME=mq-det-offline-bundle
 set OUTPUT_DIR=%BUNDLE_NAME%
@@ -73,7 +86,8 @@ if exist "requirements.txt" (
     pip download -r requirements.txt ^
         --dest "%OUTPUT_DIR%\python_packages" ^
         --platform manylinux2014_x86_64 ^
-        --python-version %PYTHON_VERSION%
+        --python-version %PYTHON_VERSION% ^
+        --only-binary=:all:
     echo     [OK] All packages downloaded
 ) else (
     echo     [WARNING] requirements.txt not found in current directory
@@ -103,7 +117,8 @@ if exist "requirements.txt" (
     pip download -r "%OUTPUT_DIR%\minimal_requirements.txt" ^
         --dest "%OUTPUT_DIR%\python_packages" ^
         --platform manylinux2014_x86_64 ^
-        --python-version %PYTHON_VERSION%
+        --python-version %PYTHON_VERSION% ^
+        --only-binary=:all:
 )
 
 REM ============================================
@@ -173,6 +188,14 @@ REM Copy all markdown files
 for %%F in (*.md) do (
     copy /Y "%%F" "%OUTPUT_DIR%\" > nul
     echo   [OK] Copied: %%F
+)
+
+REM Copy airgap scripts and documentation
+if exist "airgap" (
+    xcopy /E /I /Y /Q "airgap" "%OUTPUT_DIR%\airgap" > nul
+    echo   [OK] Copied: airgap directory ^(setup scripts and pipeline^)
+) else (
+    echo   [SKIP] Not found: airgap directory
 )
 
 REM ============================================
@@ -347,24 +370,43 @@ REM ============================================
 REM Create Bundle Archive
 REM ============================================
 echo.
-echo Creating final ZIP archive...
+echo Creating final archive...
 
-REM Check if tar is available (Windows 10+)
-where tar >nul 2>nul
+REM Use PowerShell Compress-Archive (more reliable on Windows)
+echo   -^> Using PowerShell to create ZIP archive...
+powershell -Command "Compress-Archive -Path '%BUNDLE_NAME%' -DestinationPath '%BUNDLE_NAME%.zip' -Force"
 if !errorlevel! equ 0 (
-    echo   -^> Using tar to create archive...
-    tar -czf "%BUNDLE_NAME%.tar.gz" "%BUNDLE_NAME%"
-    if !errorlevel! equ 0 (
-        for %%A in ("%BUNDLE_NAME%.tar.gz") do set BUNDLE_SIZE=%%~zA
-        set /a BUNDLE_SIZE_MB=!BUNDLE_SIZE! / 1048576
-        echo   [OK] Created %BUNDLE_NAME%.tar.gz ^(!BUNDLE_SIZE_MB! MB^)
-    )
+    for %%A in ("%BUNDLE_NAME%.zip") do set BUNDLE_SIZE=%%~zA
+    set /a BUNDLE_SIZE_MB=!BUNDLE_SIZE! / 1048576
+    echo   [OK] Created %BUNDLE_NAME%.zip ^(!BUNDLE_SIZE_MB! MB^)
+    echo.
+    echo   Note: ZIP format is used for Windows-to-Linux transfer reliability
+    echo   On Linux VM, use: unzip mq-det-offline-bundle.zip
 ) else (
-    echo   [INFO] tar not found, using PowerShell to create ZIP...
-    powershell -Command "Compress-Archive -Path '%BUNDLE_NAME%' -DestinationPath '%BUNDLE_NAME%.zip' -Force"
+    echo   [ERROR] Failed to create ZIP archive
+    echo   Please create archive manually or use 7-Zip
+)
+
+REM Optional: Try creating tar.gz if tar is available (Windows 10+)
+echo.
+set /p CREATE_TAR="Also create .tar.gz format? (y/n): "
+if /i "!CREATE_TAR!"=="y" (
+    where tar >nul 2>nul
     if !errorlevel! equ 0 (
-        for %%A in ("%BUNDLE_NAME%.zip") do set BUNDLE_SIZE=%%~zA
-        set /a BUNDLE_SIZE_MB=!BUNDLE_SIZE! / 1048576
+        echo   -^> Creating tar.gz archive...
+        tar -czf "%BUNDLE_NAME%.tar.gz" "%BUNDLE_NAME%"
+        if !errorlevel! equ 0 (
+            echo   [OK] Created %BUNDLE_NAME%.tar.gz
+            echo   Note: If tar.gz fails to extract on Linux, use the .zip file instead
+        ) else (
+            echo   [WARNING] tar.gz creation failed, use .zip file instead
+        )
+    ) else (
+        echo   [INFO] tar not found, .zip file is sufficient
+    )
+)
+
+echo.
         echo   [OK] Created %BUNDLE_NAME%.zip ^(!BUNDLE_SIZE_MB! MB^)
     )
 )
@@ -374,12 +416,13 @@ echo ==================================================
 echo Bundle preparation complete!
 echo ==================================================
 echo.
-echo Bundle location: %CD%\%BUNDLE_NAME%.zip ^(or .tar.gz^)
+echo Bundle location: %CD%\%BUNDLE_NAME%.zip
 echo.
 echo Next steps:
 echo   1. Transfer the bundle to your air-gapped VM
-echo   2. Extract the bundle
-echo   3. Run INSTALL_AIRGAP.bat ^(or follow AIRGAP_INSTALLATION.md^)
+echo      - Use: scp, WinSCP, FileZilla, or USB drive
+echo   2. On Linux VM, extract with: unzip mq-det-offline-bundle.zip
+echo   3. Follow: airgap/3-setup/SETUP_GUIDE.md
 echo.
 echo Bundle contents:
 echo   [OK] Pretrained model weights ^(MODEL/^)
@@ -387,6 +430,9 @@ echo   [OK] Python package wheels ^(python_packages/^)
 echo   [OK] Hugging Face model cache ^(hf_cache/^)
 echo   [OK] timm model cache ^(timm_cache/^)
 echo   [OK] Source code and configs
+echo   [OK] Dataset folder ^(DATASET/ including fd4_ini^)
+echo   [OK] Airgap setup scripts ^(airgap/^)
+echo   [OK] Pipeline scripts for connectors and fd4_ini
 echo   [OK] Modified Dockerfile and docker-compose for air-gap
 echo   [OK] Installation instructions and scripts
 echo.

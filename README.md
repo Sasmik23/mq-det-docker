@@ -1,6 +1,7 @@
 # MQ-Det: Multi-Query Detection Pipeline
 
 Complete implementation of MQ-Det with three deployment paths:
+
 - **Original**: Research paper implementation
 - **GCP**: Docker deployment with internet access
 - **Air-Gapped**: Kubernetes pod deployment for secure environments
@@ -30,9 +31,6 @@ mq-det-docker/
 │   ├── 1-prepare/
 │   │   ├── prepare_offline_bundle.bat      # Run on Windows with internet
 │   │   └── PREPARE_BUNDLE.md               # Bundle preparation guide
-│   │
-│   ├── 2-transfer/
-│   │   └── TRANSFER_GUIDE.md               # How to transfer bundle to pod
 │   │
 │   ├── 3-setup/
 │   │   ├── install_on_pod.sh               # Installation script
@@ -79,18 +77,21 @@ See: [gcp/GCP_DEPLOYMENT.md](gcp/GCP_DEPLOYMENT.md)
 ### Option 2: Air-Gapped Deployment (HMC Pod)
 
 #### Step 1: Prepare Bundle (on machine with internet)
-```cmd
+
+```bat
 cd airgap\1-prepare
 prepare_offline_bundle.bat
 ```
 
 #### Step 2: Transfer to Pod
+
 ```bash
-# Copy mq-det-offline-bundle.tar.gz to pod
-# See airgap/2-transfer/TRANSFER_GUIDE.md
+# Copy mq-det-offline-bundle.zip to pod
+# See airgap/AIRGAP_DEPLOYMENT.md
 ```
 
 #### Step 3: Setup on Pod
+
 ```bash
 cd /home/2300488/mik/mq-det-offline-bundle
 chmod +x airgap/3-setup/install_on_pod.sh
@@ -98,9 +99,10 @@ chmod +x airgap/3-setup/install_on_pod.sh
 ```
 
 #### Step 4: Run Pipeline
+
 ```bash
-source airgap/3-setup/setup_environment.sh
-./airgap/4-pipeline/run_full_pipeline.sh
+source ~/setup_mqdet.sh
+./run_full_pipeline_<your_dataset>.sh
 ```
 
 See: [airgap/AIRGAP_DEPLOYMENT.md](airgap/AIRGAP_DEPLOYMENT.md)
@@ -110,11 +112,13 @@ See: [airgap/AIRGAP_DEPLOYMENT.md](airgap/AIRGAP_DEPLOYMENT.md)
 ## 📊 Workflows
 
 ### GCP Workflow
+
 ```
 Internet → Docker → Extract Queries → Train → Evaluate
 ```
 
 ### Air-Gap Workflow
+
 ```
 Prepare Bundle → Transfer → Setup Pod → Extract Queries → Train → Evaluate
 ```
@@ -134,25 +138,27 @@ Prepare Bundle → Transfer → Setup Pod → Extract Queries → Train → Eval
 
 ## 📚 Documentation
 
-| Document | Description |
-|----------|-------------|
-| [gcp/GCP_DEPLOYMENT.md](gcp/GCP_DEPLOYMENT.md) | GCP Docker deployment guide |
-| [airgap/AIRGAP_DEPLOYMENT.md](airgap/AIRGAP_DEPLOYMENT.md) | Complete air-gap workflow |
-| [airgap/1-prepare/PREPARE_BUNDLE.md](airgap/1-prepare/PREPARE_BUNDLE.md) | Bundle preparation steps |
-| [airgap/3-setup/SETUP_GUIDE.md](airgap/3-setup/SETUP_GUIDE.md) | Pod installation guide |
-| [airgap/4-pipeline/PIPELINE_GUIDE.md](airgap/4-pipeline/PIPELINE_GUIDE.md) | Pipeline usage guide |
-| [ORIGINAL_MQDET_README.md](ORIGINAL_MQDET_README.md) | Original MQ-Det docs |
+| File | Description |
+|------|-------------|
+| `gcp/GCP_DEPLOYMENT.md` | GCP Docker deployment guide |
+| `airgap/AIRGAP_DEPLOYMENT.md` | Complete air-gap workflow |
+| `airgap/1-prepare/PREPARE_BUNDLE.md` | Bundle preparation steps |
+| `airgap/3-setup/SETUP_GUIDE.md` | Pod installation guide |
+| `airgap/4-pipeline/PIPELINE_GUIDE.md` | Pipeline usage guide |
+| `ORIGINAL_MQDET_README.md` | Original MQ-Det docs |
 
 ---
 
 ## 🔧 Requirements
 
 ### GCP
+
 - Docker & Docker Compose
 - NVIDIA GPU with CUDA support
 - Internet connection
 
 ### Air-Gap (HMC Pod)
+
 - Kubernetes pod with NVIDIA GPU (A100)
 - PyTorch 1.13.1 + CUDA 11.7
 - No internet required after bundle transfer
@@ -168,6 +174,7 @@ See [LICENSE](LICENSE)
 ## 🤝 Contributing
 
 This repository contains:
+
 - Original MQ-Det framework
 - GCP deployment scripts
 - HMC air-gapped deployment solution

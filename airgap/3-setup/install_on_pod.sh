@@ -105,13 +105,31 @@ cd "$BUNDLE_DIR"
 if [ -d "build" ]; then
     sudo rm -rf build
 fi
+sudo rm -rf *.egg-info
 
-# Build and install
-sudo python setup.py build develop
+# Build and install (skip dependency checks for air-gapped environment)
+echo "Building maskrcnn_benchmark (ignoring dependency checks)..."
+sudo python setup.py build develop --no-deps
 
 if [ $? -eq 0 ]; then
     echo ""
     echo "✅ maskrcnn_benchmark built successfully"
+else
+    echo ""
+    echo "❌ Build failed! Check errors above"
+    exit 1
+fi
+
+# Also build groundingdino_new
+echo ""
+echo "🔨 Building groundingdino_new..."
+cd "$BUNDLE_DIR/groundingdino_new"
+sudo rm -rf build *.egg-info
+sudo python setup.py build develop --no-deps
+
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "✅ groundingdino_new built successfully"
 else
     echo ""
     echo "❌ Build failed! Check errors above"

@@ -1,0 +1,123 @@
+# MQ-Det Configuration for FD4_INI Dataset
+# Based on official mq-glip-t.yaml but adapted for fd4_ini dataset
+
+MODEL:
+  META_ARCHITECTURE: "GeneralizedVLRCNN_New"
+  WEIGHT: "MODEL/glip_tiny_model_o365_goldg_cc_sbu.pth"
+  RPN_ONLY: True
+  RPN_ARCHITECTURE: "VLDYHEAD"
+
+  BACKBONE:
+    CONV_BODY: "SWINT-FPN-RETINANET"
+    OUT_CHANNELS: 256
+    FREEZE_CONV_BODY_AT: -1
+
+  LANGUAGE_BACKBONE:
+    FREEZE: False
+    TOKENIZER_TYPE: "bert-base-uncased"
+    MODEL_TYPE: "bert-base-uncased"
+    MASK_SPECIAL: False
+
+  ROI_BOX_HEAD:
+    POOLER_RESOLUTION: 7
+    POOLER_SCALES: (0.125, 0.0625, 0.03125, 0.015625, 0.0078125)
+    POOLER_SAMPLING_RATIO: 0
+
+  DYHEAD:
+    CHANNELS: 256
+    NUM_CONVS: 6
+    USE_GN: True
+    USE_DYRELU: True
+    USE_DFCONV: True
+    USE_DYFUSE: True
+    TOPK: 9
+    SCORE_AGG: "MEAN"
+    LOG_SCALE: 0.0
+
+    FUSE_CONFIG:
+      EARLY_FUSE_ON: True
+      TYPE: "MHA-B"
+      USE_CLASSIFICATION_LOSS: False
+      USE_TOKEN_LOSS: False
+      USE_CONTRASTIVE_ALIGN_LOSS: False
+      USE_DOT_PRODUCT_TOKEN_LOSS: True
+      USE_LAYER_SCALE: True
+      CLAMP_MIN_FOR_UNDERFLOW: True
+      CLAMP_MAX_FOR_OVERFLOW: True
+
+  RPN:
+    USE_FPN: True
+    ANCHOR_SIZES: (64, 128, 256, 512, 1024)
+    ANCHOR_STRIDE: (8, 16, 32, 64, 128)
+    ASPECT_RATIOS: (1.0,)
+    SCALES_PER_OCTAVE: 1
+
+DATASETS:
+  TRAIN: ("fd4_ini_grounding_train",)
+  TEST: ("fd4_ini_grounding_val",)
+  FEW_SHOT: 0
+
+INPUT:
+  MIN_SIZE_TRAIN: 720   # Match native image height
+  MAX_SIZE_TRAIN: 1280  # Match native image width
+  MIN_SIZE_TEST: 720
+  MAX_SIZE_TEST: 1280
+
+AUGMENT:
+  MULT_MIN_SIZE_TRAIN: (640, 680, 720, 760, 800)  # Scale variation around native size
+  BRIGHTNESS: 0.2      # Add brightness augmentation
+  CONTRAST: 0.2        # Add contrast augmentation
+  SATURATION: 0.2      # Add color variation
+  HUE: 0.1             # Slight hue variation
+
+DATALOADER:
+  SIZE_DIVISIBILITY: 32
+  NUM_WORKERS: 2        # keep it modest in containers
+
+SOLVER:
+  OPTIMIZER: "ADAMW"
+  BASE_LR: 0.00005  # Reduced LR proportionally with batch size
+  LANG_LR: 0.00005
+  WEIGHT_DECAY: 0.0001
+  STEPS: (0.67, 0.89)  # LR decay at 67% and 89%
+  MAX_EPOCH: 80  # Adjusted for larger dataset (6K images)
+  IMS_PER_BATCH: 4  # Reduced from 8 to 4 to fit in GPU memory
+  WARMUP_ITERS: 200  # Warmup for stability
+  WARMUP_FACTOR: 0.001
+  USE_AMP: True  # Automatic Mixed Precision
+  MODEL_EMA: 0.999
+  CHECKPOINT_PER_EPOCH: 0.1   # Save every 8 epochs
+  CHECKPOINT_PERIOD: 99999999  # Use per-epoch cadence
+  TUNING_HIGHLEVEL_OVERRIDE: "vision_query"
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_TYPE: "full_model"
+    CLIP_VALUE: 1.0
+    NORM_TYPE: 2.0
+
+GLIPKNOW:
+  PARALLEL_LANGUAGE_INPUT: False
+  LAN_FEATURE_AGG_TYPE: "first"
+  KNOWLEDGE_FILE: ""
+  KNOWLEDGE_TYPE: ""
+
+VISION_QUERY:
+  ENABLED: True
+  QUERY_BANK_PATH: 'MODEL/fd4_ini_query_5000_sel_tiny.pth'
+  PURE_TEXT_RATE: 0.
+  TEXT_DROPOUT: 0.3  # Dropout for regularization
+  VISION_SCALE: 1.0
+  NUM_QUERY_PER_CLASS: 10  # Queries per class for few-shot
+  RANDOM_KSHOT: False
+  ADD_ADAPT_LAYER: False
+  CONDITION_GATE: True
+  NONLINEAR_GATE: True
+  NO_CAT: True
+
+TEST:
+  EVAL_TASK: 'detection'
+  CHUNKED_EVALUATION: -1
+  IMS_PER_BATCH: 4  # Match training batch size
+
+OUTPUT_DIR: 'OUTPUT/MQ-GLIP-TINY-FD4-INI/'
+
